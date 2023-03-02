@@ -30,6 +30,8 @@ class inputFetcher(QtWidgets.QDialog):
         self.cleanedLabels = []
         self.uniquePrefixList = []
         self.outputNodes = []
+        # Prepare a dict with LABEL + ID // Reset each instance
+        self.outputInfo = []
 
         # Config tagged nodes
         self.taggedNodes = []
@@ -69,6 +71,28 @@ class inputFetcher(QtWidgets.QDialog):
         self.mainLayout.addWidget(self.labeller)
         self.mainLayout.addWidget(self.labelDivider)
 
+
+    def isValidOutput(self, node):
+        return node['label'].getValue().startswith(self.outputPrefix + self.separator)
+
+
+    def getOutputLabel(self, node):
+        return node['label'].getValue().upper()
+
+    def getOutputId(selfself, node):
+        return node['id'].getValue().upper()
+
+    def makeDict(self):
+        for node in nuke.allNodes(self.nodeClass):
+            if self.isValidOutput(node):
+                self.outputInfo.append(
+                                        {"name" : self.getOutputLabel(node),
+                                        "id" : self.getOutputId(node)}
+                                       )
+
+    def getCatagory(self, label):
+        return label.split('_')[1]
+
     def collectOutputs(self):
         # Search for dot nodes with "OUT_" in label
         self.outputLabels = []
@@ -85,12 +109,14 @@ class inputFetcher(QtWidgets.QDialog):
         return self.outputLabels
 
     def cleanOutputLabels(self):
-        # Remove prefix from labels
+        # Remove 'OUT_' prefix from labels
+        # Example: OUT_MATTE_CHARACTER --> MATTE_CHARACTER
         for l in self.outputLabels:
             self.cleanedLabels.append(l.replace(self.outputPrefix + self.separator, ""))
         self.cleanedLabels = sorted(self.cleanedLabels)
 
     def findUniquePrefixes(self):
+        # EXAMPLE: MATTE_CHARACTER --> MATTE
         for l in self.cleanedLabels:
             prefix = l.split(self.separator)[0]
             if prefix not in self.uniquePrefixList:
@@ -138,9 +164,9 @@ class inputFetcher(QtWidgets.QDialog):
         for index, value in enumerate(self.cleanedLabels):
             if value == self.cleanedLabels[index - 1] and index > 0:
                 duplicates.append(value)
-        for index, value in enumerate(self.cleanedLabels):
-            if value in duplicates:
-                self.cleanedLabels[index] = value + ' (DUPLICATE)'
+        # for index, value in enumerate(self.cleanedLabels):
+        #     if value in duplicates:
+        #         self.cleanedLabels[index] = value + ' (DUPLICATE)'
 
     def createButtonsFromLabels(self):
         # config font
@@ -195,11 +221,11 @@ class inputFetcher(QtWidgets.QDialog):
 
     def eventButtonClicked(self):
         senderName = self.sender().text()
-        if '(DUPLICATE)' in senderName:
-            QtWidgets.QMessageBox.warning(self, 'UH-OH!', (
-                "Multiple OUT_{0} found, and I couldn't figure out which one you wanted!\n\nPlease remove the duplicates!").format(
-                senderName.split(' ')[0]))
-            return False
+        # if '(DUPLICATE)' in senderName:
+        #     QtWidgets.QMessageBox.warning(self, 'UH-OH!', (
+        #         "Multiple OUT_{0} found, and I couldn't figure out which one you wanted!\n\nPlease remove the duplicates!").format(
+        #         senderName.split(' ')[0]))
+        #     return False
         l = []
         if not nuke.selectedNodes():
             n = self.createFetchNode(self.inputPrefix + self.separator + senderName)
@@ -227,9 +253,9 @@ class inputFetcher(QtWidgets.QDialog):
                         # self.setEmptyLabel(x)
                         self.close()
 
-    def findOutputNode(label, node):
-        outputLabel = self.outputPrefix + self.separator + senderName
-        inputLabel = self.inputPrefix + self.separator + senderName
+    # def findOutputNode(label, node):
+    #     outputLabel = self.outputPrefix + self.separator + senderName
+    #     inputLabel = self.inputPrefix + self.separator + senderName
 
     def connectInput(self, curNode, targetNode):
         curNode.setInput(0, targetNode)
@@ -285,22 +311,24 @@ class inputFetcher(QtWidgets.QDialog):
             print('output node yes')
             return True
 
-    def addOnCreateCommand(self, node):
-        command = """
-mySelf = nuke.thisNode()
-myId = inputFetcher.fetchId(mySelf)
-parent = inputFetcher.getParentFromId(myId)
-print(parent)
-
-if parent:
-    inputFetcher.convertToInput(mySelf)
-    #inputFetcher.connectInput(nuke.thisNode(), parent)
-    #mySelf.setInput(0, nuke.toNode(parent))
-
-
-
-        """
-        node['onCreate'].setValue(command)
+#     def addOnCreateCommand(self, node):
+         #removed because this runs when script loads, and will turn all OUT_ to IN_, which sucks.
+         #functionality moved to rsCopyPaste instead
+#         command = """
+# mySelf = nuke.thisNode()
+# myId = inputFetcher.fetchId(mySelf)
+# parent = inputFetcher.getParentFromId(myId)
+# print(parent)
+#
+# if parent:
+#     inputFetcher.convertToInput(mySelf)
+#     #inputFetcher.connectInput(nuke.thisNode(), parent)
+#     #mySelf.setInput(0, nuke.toNode(parent))
+#
+#
+#
+#         """
+#         node['onCreate'].setValue(command)
 
     def assignId(self, node):
         if not node.knob('id'):
@@ -381,6 +409,7 @@ if parent:
         self.cleanedLabels = []
         self.uniquePrefixList = []
         self.outputNodes = []
+        self.outputInfo = []
         self.taggedNodes = []
         if layout is not None:
             while layout.count():
@@ -399,7 +428,7 @@ if parent:
         fetchNode['note_font_size'].setValue(45)
         fetchNode['note_font'].setValue('Bold')
         self.assignId(fetchNode)
-        self.addOnCreateCommand(fetchNode)
+        #self.addOnCreateCommand(fetchNode)
 
         return fetchNode
 
@@ -433,3 +462,5 @@ nuke.menu('Nuke').addCommand('Edit/Input Fetcher', inputFetcher.goFetch, 'shift+
 # look for output by label and connect
 
 # nuke oncreate is not working with setInput(), look into modifying the native copy/paste functions inside of nuke
+
+#command: rename output, will rename selected output and all inputs

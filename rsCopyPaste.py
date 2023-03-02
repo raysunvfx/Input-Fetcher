@@ -10,20 +10,26 @@ def validateFetchInput(node):
 
 
 def validateFetchOutput(node):
-    inputPrefix = 'OUT_'
-    label = node['label'].getValue()[:4]
-    if inputPrefix in label:
+    if node['label'].getValue().startswith('OUT_'):
         return True
 
+def getFetcherId(node):
+    return node['id'].getValue()
 
-def findFetcherOutput(suffix):
-    n = nuke.allNodes('Dot')
-    for node in n:
-        if validateFetchOutput(node):
-            labelSuffix = node['label'].getValue()[4:]
-            if labelSuffix == suffix:
+def findFetcherOutputFrom(id, selfName):
+    for node in nuke.allNodes('Dot'):
+        if validateFetchOutput(node) and node.name() != selfName:
+            tmpId = getFetcherId(node)
+            if tmpId == id:
                 return node
 
+def convertToInput(node):
+    label = node['label'].getValue().replace('OUT_', 'IN_')
+    node['label'].setValue(label)
+
+def appendParentName():
+    parent = nuke.text_knob(nuke.thisNode().name())
+    nuke.thisNode().addKnob(parent)
 
 def connectFetchInput(node, targetNode):
     node.setInput(0, targetNode)
@@ -34,24 +40,32 @@ def hideFetchInput(node):
 def rsCopy():
     if not nuke.selectedNodes():
         return False
-    nuke.nodeCopy('%clipboard3%')
+    nuke.nodeCopy('%clipboard%')
     for node in nuke.selectedNodes('Dot'):
         if validateFetchInput(node):
-            suffix = node['label'].getValue()[3:]
-            targetNode = findFetcherOutput(suffix)
+            print('got here')
+            id = getFetcherId(node)
+            targetNode = findFetcherOutputFrom(id, node.name())
             connectFetchInput(node, targetNode)
 
 
 def rsPaste():
-    print('oh hi')
-    nuke.nodePaste('%clipboard3%')
+    nuke.nodePaste('%clipboard%')
     for node in nuke.selectedNodes('Dot'):
-        if validateFetchInput(node):
-            suffix = node['label'].getValue()[3:]
-            targetNode = findFetcherOutput(suffix)
+        if validateFetchOutput(node):
+            id = getFetcherId(node)
+            targetNode = findFetcherOutputFrom(id, node.name())
+            convertToInput(node)
+            connectFetchInput(node, targetNode)
+            hideFetchInput(node)
+        elif validateFetchInput(node):
+            id = getFetcherId(node)
+            targetNode = findFetcherOutputFrom(id, node.name())
             connectFetchInput(node, targetNode)
             hideFetchInput(node)
 
 
+
 nuke.menu('Nuke').addCommand('Edit/rsCopy', rsCopy, 'ctrl+c')
 nuke.menu('Nuke').addCommand('Edit/rsPaste', rsPaste, 'ctrl+v')
+
