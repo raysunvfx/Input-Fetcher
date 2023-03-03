@@ -73,54 +73,54 @@ class inputFetcher(QtWidgets.QDialog):
 
 
     def isValidOutput(self, node):
-        return node['label'].getValue().startswith(self.outputPrefix + self.separator)
+        return node['id'] and node['label'].getValue().startswith(self.outputPrefix + self.separator)
 
 
     def getOutputLabel(self, node):
         return node['label'].getValue().upper()
 
+
     def getOutputId(selfself, node):
         return node['id'].getValue().upper()
 
-    def makeDict(self):
-        for node in nuke.allNodes(self.nodeClass):
-            if self.isValidOutput(node):
-                self.outputInfo.append(
-                                        {"name" : self.getOutputLabel(node),
-                                        "id" : self.getOutputId(node)}
-                                       )
+
+    def makeDict(self, name, ident, label):
+        return(
+                {"name" : name,
+                 "id" : ident,
+                "label" : label}
+               )
+
 
     def getCatagory(self, label):
         return label.split('_')[1]
 
+
     def collectOutputs(self):
-        # Search for dot nodes with "OUT_" in label
-        self.outputLabels = []
-        for n in nuke.allNodes('Dot'):
+        for node in nuke.allNodes(self.nodeClass):
             try:
-                if n['id']:
-                    nodeLabel = n['label'].getValue().upper()
-                    if nodeLabel[:4] == self.outputPrefix + self.separator:
-                        self.outputLabels.append(nodeLabel)
-                        self.outputNodes.append(n)
-
+                if self.isValidOutput(node):
+                        self.outputLabels.append(self.getOutputLabel(node))
+                        self.outputNodes.append(node)
+                        self.outputInfo.append(self.makeDict(node.name(), node['id'].getValue(), node['label'].getValue()))
             except NameError:
-                return
-        return self.outputLabels
+                return False
 
-    def cleanOutputLabels(self):
-        # Remove 'OUT_' prefix from labels
-        # Example: OUT_MATTE_CHARACTER --> MATTE_CHARACTER
-        for l in self.outputLabels:
-            self.cleanedLabels.append(l.replace(self.outputPrefix + self.separator, ""))
-        self.cleanedLabels = sorted(self.cleanedLabels)
+
+    # def cleanOutputLabels(self):
+    #     # Remove 'OUT_' prefix from labels
+    #     # Example: OUT_MATTE_CHARACTER --> MATTE_CHARACTER
+    #     for l in self.outputLabels:
+    #         self.cleanedLabels.append(l.replace(self.outputPrefix + self.separator, ""))
+    #     self.cleanedLabels = sorted(self.cleanedLabels)
 
     def findUniquePrefixes(self):
         # EXAMPLE: MATTE_CHARACTER --> MATTE
-        for l in self.cleanedLabels:
-            prefix = l.split(self.separator)[0]
+        for item in self.outputInfo:
+            prefix = item['label'].replace(self.outputPrefix + self.separator, "").split(self.separator)[0]
             if prefix not in self.uniquePrefixList:
                 self.uniquePrefixList.append(prefix)
+
 
     def sortUniquePrefixes(self):
         # get all unique prefixes
@@ -142,31 +142,45 @@ class inputFetcher(QtWidgets.QDialog):
         # update uniquePrefixList with new defaultList
         self.uniquePrefixList = defaultList
 
+
+#self.cleanedLabels no longer exists, will need to update below code to work with the self.outputInfo dict format
     def groupOutputs(self):
         tmpList = []
         # first loop to find first prefix
-        for l in self.cleanedLabels:
-            # set current prefix to work on
-            curPrefix = l.split(self.separator)[0]
-            # second loop to compare to curPrefix from first loop
-            for k in self.cleanedLabels:
-                lookupPrefix = k.split(self.separator)[0]
+        for item in self.outputInfo:
+            curPrefix = item['label'].split(self.separator)[1]
+            for item in self.outputInfo:
+                lookupPrefix = item['label'].split(self.separator)[1]
                 if lookupPrefix == curPrefix:
-                    tmpList.append(k)
-            # dynamically create attribute based on curPrefix
+                    tmpList.append(
+                                    {
+                                    'label' : item['label'].split(self.separator)[2].capitalize(),
+                                    'id' : item['id'],
+                                    }
+                                    )
             setattr(self, 'group{}'.format(curPrefix.capitalize()), tmpList)
+        # for l in self.cleanedLabels:
+        #     # set current prefix to work on
+        #     curPrefix = l.split(self.separator)[0]
+        #     # second loop to compare to curPrefix from first loop
+        #     for k in self.cleanedLabels:
+        #         lookupPrefix = k.split(self.separator)[0]
+        #         if lookupPrefix == curPrefix:
+        #             tmpList.append(k)
+        #     dynamically create attribute based on curPrefix
+
             # reset tmpList before new loop begins
             tmpList = []
 
-    def markDuplicates(self):
-        # look for any duplicated labels and mark them to warn the user
-        duplicates = []
-        for index, value in enumerate(self.cleanedLabels):
-            if value == self.cleanedLabels[index - 1] and index > 0:
-                duplicates.append(value)
-        # for index, value in enumerate(self.cleanedLabels):
-        #     if value in duplicates:
-        #         self.cleanedLabels[index] = value + ' (DUPLICATE)'
+    # def markDuplicates(self):
+    #     # look for any duplicated labels and mark them to warn the user
+    #     duplicates = []
+    #     for index, value in enumerate(self.cleanedLabels):
+    #         if value == self.cleanedLabels[index - 1] and index > 0:
+    #             duplicates.append(value)
+    #     # for index, value in enumerate(self.cleanedLabels):
+    #     #     if value in duplicates:
+    #     #         self.cleanedLabels[index] = value + ' (DUPLICATE)'
 
     def createButtonsFromLabels(self):
         # config font
@@ -175,7 +189,7 @@ class inputFetcher(QtWidgets.QDialog):
         for p in self.uniquePrefixList:
             # config color by prefix
             color = self.prefixColor.get(p)
-            x = getattr(self, 'group{}'.format(p.lower().capitalize()))
+            x = getattr(self, 'group{}'.format(p.capitalize()))
             label = QtWidgets.QLabel(p)
             label.setFont(labelFont)
             label.setStyleSheet('color : {}'.format(color))
@@ -194,9 +208,10 @@ class inputFetcher(QtWidgets.QDialog):
             buttonsLayoutRef = getattr(self, '{}ButtonsLayout'.format(p.lower()))
 
             for l in x:
-                label = self.createButtonLabels(l)
+                #label = self.createButtonLabels(l)
                 # switch from label to l to make it work again!
-                button = QtWidgets.QPushButton(l)
+                button = QtWidgets.QPushButton(l['label'])
+                button.setObjectName(l['id'])
                 button.setStyleSheet("color : {}".format(color))
                 button.setFont(buttonFont)
                 button.clicked.connect(self.eventButtonClicked)
@@ -207,51 +222,55 @@ class inputFetcher(QtWidgets.QDialog):
             self.mainLayout.addLayout(buttonsLayoutRef)
             self.mainLayout.addStretch()
 
-    def createButtonLabels(self, origLabel):
-        # this doesn't work, beacuse when we click the button the sender's name does not include the prefix of the output, and fails to find it .. think of another way to hide the prefixes on the labels!
-        # skipping this func for now, until i can rework this tool to search via ID
-        label = ''
-        elements = origLabel.split('_')
-        if elements > 0 and elements[0] in self.uniquePrefixList:
-            label = origLabel.replace(elements[0] + self.separator, '')
-            return label
+    # def createButtonLabels(self, origLabel):
+    #     # this doesn't work, beacuse when we click the button the sender's name does not include the prefix of the output, and fails to find it .. think of another way to hide the prefixes on the labels!
+    #     # skipping this func for now, until i can rework this tool to search via ID
+    #     label = ''
+    #     elements = origLabel.split('_')
+    #     if elements > 0 and elements[0] in self.uniquePrefixList:
+    #         label = origLabel.replace(elements[0] + self.separator, '')
+    #         return label
 
     def setMainLayout(self):
         self.setLayout(self.mainLayout)
 
     def eventButtonClicked(self):
-        senderName = self.sender().text()
+        senderName = self.sender().objectName()
         # if '(DUPLICATE)' in senderName:
         #     QtWidgets.QMessageBox.warning(self, 'UH-OH!', (
         #         "Multiple OUT_{0} found, and I couldn't figure out which one you wanted!\n\nPlease remove the duplicates!").format(
         #         senderName.split(' ')[0]))
         #     return False
-        l = []
-        if not nuke.selectedNodes():
-            n = self.createFetchNode(self.inputPrefix + self.separator + senderName)
-            # n = nuke.createNode(self.nodeClass)
-            # n['label'].setValue()
-            l.append(n)
-        else:
-            for node in nuke.selectedNodes():
-                if not node['label'].getValue()[:4] == self.outputPrefix + self.separator:
-                    l.append(node)
-                else:
-                    QtWidgets.QMessageBox.warning(self, 'UH-OH!',
-                                                  "Sorry, one or more nodes you selected are OUTPUTs!\n\nI'm not allowed to overwrite an OUTPUT with an INPUT!")
-                    return False
+        for item in self.outputInfo:
+            if item['id'] == self.sender().objectName():
+                self.createFetchNode(self.convertLabelToInput(item['label']), item['id'])
 
-        for x in l:
-            for node in self.outputNodes:
-                outputLabel = self.outputPrefix + self.separator + senderName
-                inputLabel = self.inputPrefix + self.separator + senderName
-                if node['label'].getValue() == outputLabel:
-                    if x.Class() == self.nodeClass:
-                        self.connectInput(x, node)
-                        self.setLabel(x, inputLabel)
-                        # why did i want to set name to empty string???
-                        # self.setEmptyLabel(x)
-                        self.close()
+        # l = []
+        # if not nuke.selectedNodes():
+        #     n = self.createFetchNode(self.inputPrefix + self.separator + senderName)
+        #     # n = nuke.createNode(self.nodeClass)
+        #     # n['label'].setValue()
+        #     l.append(n)
+        # else:
+        #     for node in nuke.selectedNodes():
+        #         if not node['label'].getValue()[:4] == self.outputPrefix + self.separator:
+        #             l.append(node)
+        #         else:
+        #             QtWidgets.QMessageBox.warning(self, 'UH-OH!',
+        #                                           "Sorry, one or more nodes you selected are OUTPUTs!\n\nI'm not allowed to overwrite an OUTPUT with an INPUT!")
+        #             return False
+        #
+        # for x in l:
+        #     for node in self.outputNodes:
+        #         outputLabel = self.outputPrefix + self.separator + senderName
+        #         inputLabel = self.inputPrefix + self.separator + senderName
+        #         if node['label'].getValue() == outputLabel:
+        #             if x.Class() == self.nodeClass:
+        #                 self.connectInput(x, node)
+        #                 self.setLabel(x, inputLabel)
+        #                 # why did i want to set name to empty string???
+        #                 # self.setEmptyLabel(x)
+        #                 self.close()
 
     # def findOutputNode(label, node):
     #     outputLabel = self.outputPrefix + self.separator + senderName
@@ -302,6 +321,10 @@ class inputFetcher(QtWidgets.QDialog):
             if node.knob(self.tag):
                 self.taggedNodes.append(node)
 
+
+    def convertLabelToInput(self, label):
+        return label.replace(self.outputPrefix + self.separator, self.inputPrefix + self.separator)
+
     def convertToInput(self, node):
         label = node['label'].getValue().replace(self.outputPrefix, self.inputPrefix)
         node['label'].setValue(label)
@@ -330,13 +353,18 @@ class inputFetcher(QtWidgets.QDialog):
 #         """
 #         node['onCreate'].setValue(command)
 
-    def assignId(self, node):
-        if not node.knob('id'):
+    def assignId(self, node, id=''):
+        if not id:
             id = uuid.uuid4().hex[:16]
             knob = nuke.String_Knob('id')
             node.addKnob(knob)
             node['id'].setValue(id)
-            node['id'].setFlag(0x0000000000000080)
+        else:
+            knob = nuke.String_Knob('id')
+            node.addKnob(knob)
+            node['id'].setValue(id)
+        node['id'].setFlag(0x0000000000000080)
+
 
     def getParentFromId(self, id):
         result = []
@@ -421,13 +449,14 @@ class inputFetcher(QtWidgets.QDialog):
                 else:
                     self.resetLayout(item.layout())
 
-    def createFetchNode(self, label):
+    def createFetchNode(self, label, id=''):
         # rename this method to createFetchNode
         fetchNode = nuke.createNode(self.nodeClass)
         fetchNode['label'].setValue(label)
         fetchNode['note_font_size'].setValue(45)
         fetchNode['note_font'].setValue('Bold')
-        self.assignId(fetchNode)
+        self.assignId(fetchNode, id)
+        #self.assignId(fetchNode)
         #self.addOnCreateCommand(fetchNode)
 
         return fetchNode
@@ -438,8 +467,8 @@ class inputFetcher(QtWidgets.QDialog):
         self.setModal(True)
         self.show()
         self.collectOutputs()
-        self.cleanOutputLabels()
-        self.markDuplicates()
+        #self.cleanOutputLabels()
+        #self.markDuplicates()
         self.groupOutputs()
         self.findUniquePrefixes()
         self.sortUniquePrefixes()
