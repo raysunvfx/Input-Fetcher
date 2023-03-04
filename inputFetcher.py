@@ -73,7 +73,11 @@ class inputFetcher(QtWidgets.QDialog):
 
 
     def isValidOutput(self, node):
-        return node['id'] and node['label'].getValue().startswith(self.outputPrefix + self.separator)
+        try:
+            label = node['label'].getValue()
+            return node['id'] and label.startswith(self.outputPrefix + self.separator) and label.count(self.separator) >= 2
+        except NameError:
+            pass
 
 
     def getOutputLabel(self, node):
@@ -98,13 +102,10 @@ class inputFetcher(QtWidgets.QDialog):
 
     def collectOutputs(self):
         for node in nuke.allNodes(self.nodeClass):
-            try:
-                if self.isValidOutput(node):
-                        self.outputLabels.append(self.getOutputLabel(node))
-                        self.outputNodes.append(node)
-                        self.outputInfo.append(self.makeDict(node.name(), node['id'].getValue(), node['label'].getValue()))
-            except NameError:
-                return False
+            if self.isValidOutput(node):
+                    self.outputLabels.append(self.getOutputLabel(node))
+                    self.outputNodes.append(node)
+                    self.outputInfo.append(self.makeDict(node.name(), node['id'].getValue(), node['label'].getValue()))
 
 
     # def cleanOutputLabels(self):
@@ -243,7 +244,9 @@ class inputFetcher(QtWidgets.QDialog):
         #     return False
         for item in self.outputInfo:
             if item['id'] == self.sender().objectName():
-                self.createFetchNode(self.convertLabelToInput(item['label']), item['id'])
+                node = self.createFetchNode(self.convertLabelToInput(item['label']), item['id'])
+                self.connectInput(node, nuke.toNode(item['name']))
+            self.close()
 
         # l = []
         # if not nuke.selectedNodes():
@@ -291,14 +294,31 @@ class inputFetcher(QtWidgets.QDialog):
     def setEmptyLabel(self, node):
         node['name'].setValue('')
 
+    def findOutputFromLabel(self, label):
+        for node in nuke.allNodes(self.nodeClass):
+            if self.isValidOutput(node):
+                if node['label'].getValue().strip().upper() == label.upper():
+                    return [node['label'].getValue(), node['id'].getValue()]
+
+
+    def findOutputFromId(self, id):
+        for info in self.outputInfo:
+            if info['id'] == id:
+                return info['name']
+
     def labelNode(self):
         input = self.labeller.text().upper()
         n = nuke.selectedNodes()
+        if len(n) == 1 and not self.isValidOutput(nuke.selectedNode()):
+            if input.startswith(self.outputPrefix + self.separator):
+                self.createFetchNode(input)
+
         if not n:
             # print("\nFailed at {}.".format(inputFetcher.setLabel.__name__)) this prints the name of the function
             self.createFetchNode(input)
             self.close()
 
+        # check for commands
         for node in n:  #
             if not input == 'TAG' and not input == 'UNTAG':
                 self.setLabel(node, input)
@@ -449,15 +469,23 @@ class inputFetcher(QtWidgets.QDialog):
                 else:
                     self.resetLayout(item.layout())
 
+    def validateLabelFormat(self, label):
+        return label.count(self.separator) >= 2
+
     def createFetchNode(self, label, id=''):
         # rename this method to createFetchNode
-        fetchNode = nuke.createNode(self.nodeClass)
+        if not nuke.selectedNodes():
+            fetchNode = nuke.createNode(self.nodeClass)
+        else:
+            fetchNode = nuke.selectedNode()
         fetchNode['label'].setValue(label)
         fetchNode['note_font_size'].setValue(45)
         fetchNode['note_font'].setValue('Bold')
-        self.assignId(fetchNode, id)
+        if self.validateLabelFormat(label):
+            self.assignId(fetchNode, id)
         #self.assignId(fetchNode)
         #self.addOnCreateCommand(fetchNode)
+
 
         return fetchNode
 
@@ -493,3 +521,5 @@ nuke.menu('Nuke').addCommand('Edit/Input Fetcher', inputFetcher.goFetch, 'shift+
 # nuke oncreate is not working with setInput(), look into modifying the native copy/paste functions inside of nuke
 
 #command: rename output, will rename selected output and all inputs
+
+
