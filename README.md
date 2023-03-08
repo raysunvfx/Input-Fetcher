@@ -1,12 +1,12 @@
 # Input-Fetcher
 
-### What it does:
+## What it does:
 Input-Fetcher is a node organization system for the Foundry Nuke, which works on the idea of INPUTs and OUTPUTs.
 <br>
 Where INPUTs are child nodes, and OUTPUTs are parent nodes.
 
 
-### How to use:
+## How to use:
 To call Input-Fetcher, use the hotkey "SHIFT + N" in Nuke:
 ![ Alt text](inputFetcher_00.gif)
 
