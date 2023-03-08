@@ -50,3 +50,6 @@ GEO<br>
 
 To create an OUTPUT for a plate, we can enter <b>"OUT_PLATE_NATIVE"</b>:
 ![ Alt text](inputFetcher_04.gif)
+
+Calling Input-Fetcher again, the newly created OUTPUT node will be visible in the UI, clicking it will create an INPUT node:
+![ Alt text](inputFetcher_05.gif)
