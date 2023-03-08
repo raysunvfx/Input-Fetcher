@@ -36,7 +36,7 @@ If multiple nodes are selected, all will receive the same label:
 Creating INPUTs and OUTPUTs is the main functionality of Input-Fetcher.<br>
 To create an OUTPUT, we need to use this syntax:<br>
 <p align="center">
-"OUT_PREFIX_LABEL"
+### "OUT_PREFIX_LABEL"
 </p>
 
 Here are the default prefixes that Input-Fetcher recognizes:
