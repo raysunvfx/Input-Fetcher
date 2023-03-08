@@ -58,9 +58,11 @@ def rsPaste():
             convertToInput(node)
             connectFetchInput(node, targetNode)
             hideFetchInput(node)
-        elif validateFetchInput(node):
+    for node in nuke.selectedNodes('Dot'):
+        if validateFetchInput(node):
             id = getFetcherId(node)
             targetNode = findFetcherOutputFrom(id, node.name())
+            print(targetNode.name())
             connectFetchInput(node, targetNode)
             hideFetchInput(node)
 
