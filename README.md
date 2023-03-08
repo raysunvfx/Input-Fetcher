@@ -17,7 +17,7 @@ There are three contexts:
 1. Labeller
 2. Input/Output
 3. Commands
-
+<HR></HR>
 ### Labeller Context
 
 
@@ -31,5 +31,21 @@ If we call Input-Fetcher with a node selected however, any input we enter will b
 If multiple nodes are selected, all will receive the same label:
 ![ Alt text](inputFetcher_03.gif)
 
+<HR></HR>
+### Input/Output Context:
+Creating INPUTs and OUTPUTs is the main functionality of Input-Fetcher.<br>
+To create an OUTPUT, we need to use this syntax:<br>
+<p align="center">
+"OUT_PREFIX_LABEL"
+</p>
 
-To create an INPUT node:
+Here are the default prefixes that Input-Fetcher recognizes:
+<p align="center">
+PLATE<br>
+MATTE<br>
+RENDER<br>
+DEEP<br>
+CAM<br>
+GEO<br>
+
+</p>
