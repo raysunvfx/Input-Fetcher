@@ -11,7 +11,7 @@ To call Input-Fetcher, use the hotkey "SHIFT + N" in Nuke:
 ![ Alt text](inputFetcher_00.gif)
 
 Input-Fetcher has different functionality based on context.
-<details>
+<HR>
 <summary>Labeller Context</summary>
 
 Currently, we don't have any nodes selected, so it will by default create a "Dot" node and set the input text as its label:
@@ -22,6 +22,6 @@ If we call Input-Fetcher with a node selected however, any input we enter will b
 
 If multiple nodes are selected, all will receive the same label:
 ![ Alt text](inputFetcher_03.gif)
-</details>
+</HR>
 
 To create an INPUT node:
