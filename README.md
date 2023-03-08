@@ -1,9 +1,10 @@
 # Input-Fetcher
 
 ## What it does:
-<HR>
+<HR></HR>
 Input-Fetcher is a node organization system for the Foundry Nuke, which works on the idea of INPUTs and OUTPUTs.
-<br></HR>
+<br>
+<HR></HR>
 
 ## How to use:
 To call Input-Fetcher, use the hotkey "SHIFT + N" in Nuke:
