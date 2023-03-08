@@ -47,3 +47,6 @@ RENDER<br>
 DEEP<br>
 CAM<br>
 GEO<br>
+
+To create an OUTPUT for a plate, we can enter <b>"OUT_PLATE_NATIVE"</b>:
+![ Alt text](inputFetcher_04.gif)
