@@ -13,6 +13,10 @@ To call Input-Fetcher, use the hotkey "SHIFT + N" in Nuke:
 
 
 Input-Fetcher has different functionality based on context.
+There are three contexts:
+1. Labeller
+2. Input/Output
+3. Commands
 
 ### Labeller Context
 
