@@ -1,8 +1,8 @@
 # Input-Fetcher
-
+<HR>
 ## What it does:
 Input-Fetcher is a node organization system for the Foundry Nuke, which works on the idea of INPUTs and OUTPUTs.
-<br>
+<br></HR>
 
 ## How to use:
 To call Input-Fetcher, use the hotkey "SHIFT + N" in Nuke:
@@ -10,8 +10,9 @@ To call Input-Fetcher, use the hotkey "SHIFT + N" in Nuke:
 
 Input-Fetcher has different functionality based on context.
 <HR></HR>
-<HR></HR>
 ### Labeller Context
+<HR></HR>
+
 
 Currently, we don't have any nodes selected, so it will by default create a "Dot" node and set the input text as its label:
 ![ Alt text](inputFetcher_01.gif)
