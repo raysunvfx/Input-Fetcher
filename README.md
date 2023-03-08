@@ -13,3 +13,4 @@ To call Input-Fetcher, use the hotkey "SHIFT + N" in Nuke.
 To create a new OUTPUT node:
 ![ Alt text](inputFetcher_0.gif)
 
+To create an INPUT node:
