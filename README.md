@@ -7,7 +7,7 @@ Input-Fetcher is a node organization system for the Foundry Nuke, which works on
 
 
 ## How to use:
-<HR></HR>
+
 To call Input-Fetcher, use the hotkey "SHIFT + N" in Nuke:
 ![ Alt text](inputFetcher_00.gif)
 
