@@ -53,3 +53,9 @@ To create an OUTPUT for a plate, we can enter <b>"OUT_PLATE_NATIVE"</b>:
 
 Calling Input-Fetcher again, the newly created OUTPUT node will be visible in the UI, clicking it will create an INPUT node:
 ![ Alt text](inputFetcher_05.gif)
+
+We can also create INPUT nodes by copy and pasting OUTPUT nodes:
+![ Alt text](inputFetcher_06.gif)
+
+Or by copy and pasting other INPUT nodes:
+![ Alt text](inputFetcher_07.gif)
