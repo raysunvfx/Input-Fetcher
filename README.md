@@ -1,7 +1,9 @@
 # Input-Fetcher
 
-### My test
+### What it does:
+Input-Fetcher is a node organization tool for the Foundry Nuke.
 
-`asdfklasdlfjk`
+### How to use:
+
 
 test
