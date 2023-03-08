@@ -40,12 +40,10 @@ To create an OUTPUT, we need to use this syntax:<br>
 </p>
 
 Here are the default prefixes that Input-Fetcher recognizes:
-<p align="center">
+
 PLATE<br>
 MATTE<br>
 RENDER<br>
 DEEP<br>
 CAM<br>
 GEO<br>
-
-</p>
