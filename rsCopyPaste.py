@@ -10,8 +10,11 @@ def validateFetchInput(node):
 
 
 def validateFetchOutput(node):
-    if node['label'].getValue().startswith('OUT_'):
-        return True
+    try:
+        if node['label'].getValue().startswith('OUT_') and node['id']:
+            return True
+    except NameError:
+        return False
 
 def getFetcherId(node):
     return node['id'].getValue()
@@ -53,11 +56,7 @@ def rsPaste():
     nuke.nodePaste('%clipboard%')
     for node in nuke.selectedNodes('Dot'):
         if validateFetchOutput(node):
-            id = getFetcherId(node)
-            targetNode = findFetcherOutputFrom(id, node.name())
             convertToInput(node)
-            connectFetchInput(node, targetNode)
-            hideFetchInput(node)
     for node in nuke.selectedNodes('Dot'):
         if validateFetchInput(node):
             id = getFetcherId(node)
