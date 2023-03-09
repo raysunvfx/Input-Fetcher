@@ -304,6 +304,7 @@ class InputFetcher(QtWidgets.QDialog):
                     self.updateOuputAndChildren(self.fetchId(node), input)
                     #update the OUTPUT and all INPUTs
                     self.close()
+                    #here
                 elif input != 'TAG' and input != 'UNTAG':
                     self.setLabel(node, input)
                 else:
