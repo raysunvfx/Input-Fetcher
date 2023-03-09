@@ -2,35 +2,6 @@ from PySide2 import QtWidgets, QtCore, QtGui
 import uuid
 import nuke
 
-# class LabelValidator(QtGui.QValidator):
-#     def __init__(self, values):
-#         super(LabelValidator, self).__init__()
-#         self.values = values
-#
-#     def validate(self, label, pos):
-#         for value in self.values:
-#             if label != value:
-#                 return QtGui.QValidator.Acceptable, label, pos
-#             else:
-#                 return QtGui.QValidator.Invalid, label, pos
-
-
-        #     if label.startswith(value):
-        #         if len(label) > len(value):
-        #             return QtGui.QValidator.Intermediate, label, pos
-        #         else:
-        #             return QtGui.QValidator.Acceptable, label, pos
-        # print(label+' invalid')
-        # return QtGui.QValidator.Intermediate, label, pos
-
-        # if label not in self.values:
-        #     print('yes')
-        #     print(self.values)
-        #     return QtGui.QValidator.Acceptable, label, pos
-        # else:
-        #     print('duplicate')
-        #     return QtGui.QValidator.Invalid, label, pos
-
 
 class InputFetcher(QtWidgets.QDialog):
     def __init__(self):
@@ -83,13 +54,11 @@ class InputFetcher(QtWidgets.QDialog):
         if len(nuke.selectedNodes()) == 1:
             n = nuke.selectedNode()
             placeHolderText = n['label'].getValue()
-        #labelValidator = LabelValidator('poop')
-        self.labeller = QtWidgets.QLineEdit()#placeHolderText
-        #self.labeller.setPlaceholderText("Enter a command or label ... ")
+        self.labeller = QtWidgets.QLineEdit(placeHolderText)
+        self.labeller.setPlaceholderText("Enter a command or label ... ")
         self.labeller.returnPressed.connect(self.labelNode)
         self.labeller.selectAll()
         QtCore.QTimer.singleShot(0, self.labeller.setFocus)
-        #self.labeller.setValidator(LabelValidator([item['label'] for item in self.outputInfo]))
         self.labellerLabel = QtWidgets.QLabel('ENTER LABEL:')
         self.labellerLabel.setFont(QtGui.QFont(self.masterFont, 15, QtGui.QFont.Bold))
         self.warningLabel = QtWidgets.QLabel('')
@@ -105,7 +74,7 @@ class InputFetcher(QtWidgets.QDialog):
         self.mainLayout.addWidget(self.labeller)
         self.mainLayout.addWidget(self.labelDivider)
 
-    def validateLabelInput(self, label):
+    def duplicateLabelInput(self, label):
         existingLabels = [item['label'] for item in self.outputInfo]
         if label in existingLabels:
             return True
@@ -115,8 +84,14 @@ class InputFetcher(QtWidgets.QDialog):
             label = node['label'].getValue()
             return node['id'] and label.startswith(self.outputPrefix + self.separator) and label.count(self.separator) >= 2
         except NameError:
-            pass
+            return False
 
+    def isValidInput(self, node):
+        try:
+            label = node['label'].getValue()
+            return node['id'] and label.startswith(self.inputPrefix + self.separator) and label.count(self.separator) >= 2
+        except NameError:
+            pass
 
     def getOutputLabel(self, node):
         return node['label'].getValue().upper()
@@ -284,18 +259,36 @@ class InputFetcher(QtWidgets.QDialog):
             if info['id'] == id:
                 return info['name']
 
+    def updateOuputAndChildren(self, ident, label):
+        for item in self.outputInfo:
+            if item['id'] == ident:
+                parent = nuke.toNode(item['name'])
+                if self.isValidOutput(parent):
+                    self.setLabel(parent, label)
+                for node in nuke.allNodes(self.nodeClass):
+                    if self.isValidInput(node) and node['id'].getValue() == ident:
+                        self.setLabel(node, label.replace(self.outputPrefix + self.separator, self.inputPrefix + self.separator))
+
     def labelNode(self):
         input = self.labeller.text().upper()
-        if self.validateLabelInput(input):
-            #nuke.message('duplicate')
+        if self.duplicateLabelInput(input):
             self.warningLabel.setText(input + ' already exists.  Please enter a different name.')
-            #self.setStyleSheet('color : yellow')
-           # self.repaint()
             return
         n = nuke.selectedNodes()
+
+        outputCounter = 0
+        for node in n:
+            if self.isValidOutput(node):
+                outputCounter += 1
+
+        if outputCounter > 1:
+            self.warningLabel.setText("CAN'T RENAME MULTIPLE OUTPUTS, PLEASE NAME ONE AT A TIME!")
+
+
         if len(n) == 1 and not self.isValidOutput(nuke.selectedNode()):
             if input.startswith(self.outputPrefix + self.separator):
                 self.createFetchNode(input)
+
 
         if not n:
             # print("\nFailed at {}.".format(inputFetcher.setLabel.__name__)) this prints the name of the function
@@ -304,14 +297,21 @@ class InputFetcher(QtWidgets.QDialog):
 
         # check for commands
         for node in n:  #
-            if not input == 'TAG' and not input == 'UNTAG':
-                self.setLabel(node, input)
-            else:
-                if input == 'TAG':
-                    self.tagNode(node)
-                if input == 'UNTAG':
-                    self.untagNode(node)
-            self.close()
+            if not self.isValidInput(node):
+                #if the current node is NOT an input
+                if self.isValidOutput(node) and self.validateLabelFormat(input):
+                    #if the current node is OUTPUT and the label is a valid format
+                    self.updateOuputAndChildren(self.fetchId(node), input)
+                    #update the OUTPUT and all INPUTs
+                    self.close()
+                elif input != 'TAG' and input != 'UNTAG':
+                    self.setLabel(node, input)
+                else:
+                    if input == 'TAG':
+                        self.tagNode(node)
+                    if input == 'UNTAG':
+                        self.untagNode(node)
+                self.close()
 
     def tagNode(self, node):  #
         if not node.knob(self.tag):
@@ -332,11 +332,6 @@ class InputFetcher(QtWidgets.QDialog):
     def convertToInput(self, node):
         label = node['label'].getValue().replace(self.outputPrefix, self.inputPrefix)
         node['label'].setValue(label)
-
-    def isOutput(self, node):
-        if node['label'].getValue()[:4] == self.outputPrefix + self.separator:
-            print('output node yes')
-            return True
 
 
     def assignId(self, node, id=''):
