@@ -259,36 +259,70 @@ class InputFetcher(QtWidgets.QDialog):
             if info['id'] == id:
                 return info['name']
 
+    def getColorFromPrefix(self, label):
+        targetPrefix = label.split(self.separator)[1]
+        for prefix, color in self.prefixColorl.items():
+            if prefix == targetPrefix:
+                return color
+
     def updateOuputAndChildren(self, ident, label):
         for item in self.outputInfo:
             if item['id'] == ident:
                 parent = nuke.toNode(item['name'])
+                prefix = label.split(self.separator)[1]
                 if self.isValidOutput(parent):
                     self.setLabel(parent, label)
+                    self.colorNodeByPrefix(parent, prefix)
                 for node in nuke.allNodes(self.nodeClass):
                     if self.isValidInput(node) and node['id'].getValue() == ident:
                         self.setLabel(node, label.replace(self.outputPrefix + self.separator, self.inputPrefix + self.separator))
+                        self.colorNodeByPrefix(node, prefix)
+
+    def multipleOutputsSelected(self, nodes):
+        outputCounter = 0
+        for node in nodes:
+            if self.isValidOutput(node):
+                outputCounter += 1
+        if outputCounter > 1:
+            return True
+        return False
+
+    def inputsSelected(self, nodes):
+        foundInput = False
+        foundOutput = False
+        for node in nodes:
+            if self.isValidInput(node):
+                foundInput = True
+                break
+        for node in nodes:
+            if self.isValidOutput(node):
+                foundOutput = True
+                break
+        if foundOutput:
+            return False
+        else:
+            return foundInput
+
+
 
     def labelNode(self):
         input = self.labeller.text().upper()
         if self.duplicateLabelInput(input):
             self.warningLabel.setText(input + ' already exists.  Please enter a different name.')
             return
+
         n = nuke.selectedNodes()
+        if self.multipleOutputsSelected(n):
+            self.warningLabel.setText("CAN'T RENAME MULTIPLE OUTPUTS AT THE SAME TIME.  RENAME ONE AT A TIME PLEASE!")
+            return
 
-        outputCounter = 0
-        for node in n:
-            if self.isValidOutput(node):
-                outputCounter += 1
-
-        if outputCounter > 1:
-            self.warningLabel.setText("CAN'T RENAME MULTIPLE OUTPUTS, PLEASE NAME ONE AT A TIME!")
-
+        if self.inputsSelected(n):
+            self.warningLabel.setText("CAN'T RENAME INPUT NODES.")
+            return
 
         if len(n) == 1 and not self.isValidOutput(nuke.selectedNode()):
             if input.startswith(self.outputPrefix + self.separator):
                 self.createFetchNode(input)
-
 
         if not n:
             # print("\nFailed at {}.".format(inputFetcher.setLabel.__name__)) this prints the name of the function
@@ -306,6 +340,9 @@ class InputFetcher(QtWidgets.QDialog):
                     self.close()
                     #here
                 elif input != 'TAG' and input != 'UNTAG':
+                    if self.isValidOutput(node):
+                        self.warningLabel.setText("INVALID OUTPUT LABEL.  SYNTAX = OUT_PREFIX_LABEL")
+                        return False
                     self.setLabel(node, input)
                 else:
                     if input == 'TAG':
