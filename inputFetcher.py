@@ -322,7 +322,13 @@ class InputFetcher(QtWidgets.QDialog):
 
         if len(n) == 1 and not self.isValidOutput(nuke.selectedNode()):
             if input.startswith(self.outputPrefix + self.separator):
-                self.createFetchNode(input)
+                if nuke.selectedNode().Class() == self.nodeClass:
+                    self.createFetchNode(input)
+                else:
+                    nuke.createNode(self.nodeClass)
+                    self.createFetchNode(input)
+                    self.close()
+            return
 
         if not n:
             # print("\nFailed at {}.".format(inputFetcher.setLabel.__name__)) this prints the name of the function
@@ -341,9 +347,10 @@ class InputFetcher(QtWidgets.QDialog):
                     #here
                 elif input != 'TAG' and input != 'UNTAG':
                     if self.isValidOutput(node):
-                        self.warningLabel.setText("INVALID OUTPUT LABEL.  SYNTAX = OUT_PREFIX_LABEL")
+                        self.warningLabel.setText("TRYING TO RENAME AN OUTPUT NODE WITH AN INVALID LABEL.  SYNTAX = OUT_PREFIX_LABEL")
                         return False
-                    self.setLabel(node, input)
+                    elif not input.startswith(self.outputPrefix + self.separator):
+                        self.setLabel(node, input)
                 else:
                     if input == 'TAG':
                         self.tagNode(node)
