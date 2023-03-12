@@ -324,6 +324,7 @@ class InputFetcher(QtWidgets.QDialog):
             if input.startswith(self.outputPrefix + self.separator):
                 if nuke.selectedNode().Class() == self.nodeClass:
                     self.createFetchNode(input)
+                    self.close()
                 else:
                     nuke.createNode(self.nodeClass)
                     self.createFetchNode(input)
