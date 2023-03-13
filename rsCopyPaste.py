@@ -32,14 +32,20 @@ def convertToInput(node):
 
 def outputExists(inputNode):
     for node in nuke.allNodes('Dot'):
-        if inputNode['id'].getValue() == node['id'].getValue() and validateFetchOutput(node) and validateFetchInput(inputNode) or validateFetchOutput(inputNode):
-            return True
+        try:
+            if inputNode['id'].getValue() == node['id'].getValue() and validateFetchOutput(node) and validateFetchInput(inputNode) or validateFetchOutput(inputNode):
+                return True
+        except NameError:
+            pass
     return False
 
 def hasDuplicateOutput(output):
     for node in nuke.allNodes('Dot'):
-        if output['id'].getValue() == node['id'].getValue() and validateFetchOutput(node) and node != output:
-            return True
+        try:
+            if output['id'].getValue() == node['id'].getValue() and validateFetchOutput(node) and node != output:
+                return True
+        except NameError:
+            pass
     return False
 
 def createOutputFromInput(inputNode):
@@ -95,4 +101,3 @@ def rsPaste():
 
 nuke.menu('Nuke').addCommand('Edit/rsCopy', rsCopy, 'ctrl+c')
 nuke.menu('Nuke').addCommand('Edit/rsPaste', rsPaste, 'ctrl+v')
-
