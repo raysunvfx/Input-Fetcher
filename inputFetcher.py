@@ -329,6 +329,11 @@ class InputFetcher(QtWidgets.QDialog):
                     nuke.createNode(self.nodeClass)
                     self.createFetchNode(input)
                     self.close()
+            else:
+                nuke.selectedNode()['label'].setValue(input)
+                nuke.selectedNode()['note_font_size'].setValue(45)
+                nuke.selectedNode()['note_font'].setValue('Bold')
+                self.close()
             return
 
         if not n:
