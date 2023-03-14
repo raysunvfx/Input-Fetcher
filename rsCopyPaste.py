@@ -56,6 +56,9 @@ def createOutputFromInput(inputNode):
     output['id'].setEnabled(False)
     output['tile_color'].setValue(int(inputNode['tile_color'].getValue()))
     output['note_font_color'].setValue(int(inputNode['tile_color'].getValue()))
+    for knob in output.knobs():
+        if knob != 'id':
+            output[knob].setVisible(False)
     xPos = inputNode['xpos'].getValue()
     yPos = inputNode['ypos'].getValue()
     output['xpos'].setValue(xPos)
@@ -82,6 +85,10 @@ def rsCopy():
             targetNode = findFetcherOutputFrom(id, node.name())
             connectFetchInput(node, targetNode)
 
+def hideFetcherKnobs(node):
+    for knob in node.knobs():
+        if knob != 'id':
+            node[knob].setVisible(False)
 
 def rsPaste():
     nuke.nodePaste('%clipboard%')
@@ -96,6 +103,8 @@ def rsPaste():
             targetNode = findFetcherOutputFrom(id, node.name())
             connectFetchInput(node, targetNode)
             hideFetchInput(node)
+    for node in nuke.selectedNodes('Dot'):
+        hideFetcherKnobs(node)
 
 
 
