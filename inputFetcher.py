@@ -325,21 +325,21 @@ class InputFetcher(QtWidgets.QDialog):
             self.warningLabel.setText("CAN'T RENAME INPUT NODES.")
             return
 
-        # if len(n) == 1 and not self.isValidOutput(nuke.selectedNode()):
-        #     if input.startswith(self.outputPrefix + self.separator):
-        #         if nuke.selectedNode().Class() == self.nodeClass:
-        #             self.createFetchNode(input)
-        #             self.close()
-        #         else:
-        #             nuke.createNode(self.nodeClass)
-        #             self.createFetchNode(input)
-        #             self.close()
-        #     else:
-        #         nuke.selectedNode()['label'].setValue(input)
-        #         nuke.selectedNode()['note_font_size'].setValue(45)
-        #         nuke.selectedNode()['note_font'].setValue('Bold')
-        #         self.close()
-        #     return
+        if len(n) == 1 and not self.isValidOutput(nuke.selectedNode()) and not self.inputIsCommand(input):
+            if input.startswith(self.outputPrefix + self.separator):
+                if nuke.selectedNode().Class() == self.nodeClass:
+                    self.createFetchNode(input)
+                    self.close()
+                else:
+                    nuke.createNode(self.nodeClass)
+                    self.createFetchNode(input)
+                    self.close()
+            else:
+                nuke.selectedNode()['label'].setValue(input)
+                nuke.selectedNode()['note_font_size'].setValue(45)
+                nuke.selectedNode()['note_font'].setValue('Bold')
+                self.close()
+            return
 
         if not n:
             # print("\nFailed at {}.".format(inputFetcher.setLabel.__name__)) this prints the name of the function
