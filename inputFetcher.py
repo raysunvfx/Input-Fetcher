@@ -498,6 +498,9 @@ class InputFetcher(QtWidgets.QDialog):
         fetchNode['label'].setValue(label)
         fetchNode['note_font_size'].setValue(45)
         fetchNode['note_font'].setValue('Bold')
+        for knob in fetchNode.knobs():
+            if knob != 'id':
+                fetchNode[knob].setVisible(False)
         try:
             prefix = label.split(self.separator)[1].upper()
             self.colorNodeByPrefix(fetchNode, prefix)
