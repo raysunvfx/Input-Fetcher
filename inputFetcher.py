@@ -21,7 +21,7 @@ class InputFetcher(QtWidgets.QDialog):
         self.outputPrefix = 'OUT'
         self.inputPrefix = 'IN'
         self.separator = '_'
-        self.tag = 'inputFetcherTag'
+        self.tagKnob = 'inputFetcherTag'
 
         # Config label variables
         self.prefixDefaults = ['PLATE', 'MATTE', 'RENDER', 'DEEP', 'CAM', 'GEO']
@@ -45,6 +45,8 @@ class InputFetcher(QtWidgets.QDialog):
             'GEO': '#FFA500',
         }
 
+        # Config commands
+        self.commands = ['TAG', 'UNTAG']
         # Config layout
         self.mainLayout = QtWidgets.QVBoxLayout()
 
@@ -303,6 +305,8 @@ class InputFetcher(QtWidgets.QDialog):
         else:
             return foundInput
 
+    def inputIsCommand(self, input):
+        return input in self.commands
 
 
     def labelNode(self):
@@ -312,6 +316,7 @@ class InputFetcher(QtWidgets.QDialog):
             return
 
         n = nuke.selectedNodes()
+
         if self.multipleOutputsSelected(n):
             self.warningLabel.setText("CAN'T RENAME MULTIPLE OUTPUTS AT THE SAME TIME.  RENAME ONE AT A TIME PLEASE!")
             return
@@ -320,21 +325,21 @@ class InputFetcher(QtWidgets.QDialog):
             self.warningLabel.setText("CAN'T RENAME INPUT NODES.")
             return
 
-        if len(n) == 1 and not self.isValidOutput(nuke.selectedNode()):
-            if input.startswith(self.outputPrefix + self.separator):
-                if nuke.selectedNode().Class() == self.nodeClass:
-                    self.createFetchNode(input)
-                    self.close()
-                else:
-                    nuke.createNode(self.nodeClass)
-                    self.createFetchNode(input)
-                    self.close()
-            else:
-                nuke.selectedNode()['label'].setValue(input)
-                nuke.selectedNode()['note_font_size'].setValue(45)
-                nuke.selectedNode()['note_font'].setValue('Bold')
-                self.close()
-            return
+        # if len(n) == 1 and not self.isValidOutput(nuke.selectedNode()):
+        #     if input.startswith(self.outputPrefix + self.separator):
+        #         if nuke.selectedNode().Class() == self.nodeClass:
+        #             self.createFetchNode(input)
+        #             self.close()
+        #         else:
+        #             nuke.createNode(self.nodeClass)
+        #             self.createFetchNode(input)
+        #             self.close()
+        #     else:
+        #         nuke.selectedNode()['label'].setValue(input)
+        #         nuke.selectedNode()['note_font_size'].setValue(45)
+        #         nuke.selectedNode()['note_font'].setValue('Bold')
+        #         self.close()
+        #     return
 
         if not n:
             # print("\nFailed at {}.".format(inputFetcher.setLabel.__name__)) this prints the name of the function
@@ -343,6 +348,9 @@ class InputFetcher(QtWidgets.QDialog):
 
         # check for commands
         for node in n:  #
+            if self.inputIsCommand(input):
+                cmd = getattr(self, input.lower())
+                cmd(nuke.toNode(node.name()))
             if not self.isValidInput(node):
                 #if the current node is NOT an input
                 if self.isValidOutput(node) and self.validateLabelFormat(input):
@@ -357,23 +365,19 @@ class InputFetcher(QtWidgets.QDialog):
                         return False
                     elif not input.startswith(self.outputPrefix + self.separator):
                         self.setLabel(node, input)
-                else:
-                    if input == 'TAG':
-                        self.tagNode(node)
-                    if input == 'UNTAG':
-                        self.untagNode(node)
+
                 self.close()
 
-    def tagNode(self, node):  #
-        if not node.knob(self.tag):
-            knob = nuke.Boolean_Knob(self.tag, self.tag, 1)
+    def tag(self, node):  #
+        if not node.knob(self.tagKnob):
+            knob = nuke.Boolean_Knob(self.tagKnob, self.tagKnob, 1)
             node.addKnob(knob)
             knob.setVisible(False)
             node.knob(0).setFlag(0)
 
     def findTaggedNodes(self):
         for node in nuke.allNodes():
-            if node.knob(self.tag):
+            if node.knob(self.tagKnob):
                 self.taggedNodes.append(node)
 
 
@@ -448,15 +452,15 @@ class InputFetcher(QtWidgets.QDialog):
             if senderName == node.name():
                 node.setSelected(True)
         nuke.duplicateSelectedNodes()
-        self.untagNode(nuke.selectedNode())
+        self.untag(nuke.selectedNode())
 
         self.close()
 
-    def untagNode(self, node):
-        if node.knob(self.tag):
+    def untag(self, node):
+        if node.knob(self.tagKnob):
             for x in range(node.numKnobs()):
                 knob = node.knob(x)
-                if knob.name() == self.tag:
+                if knob.name() == self.tagKnob:
                     node.removeKnob(knob)
 
     def clearSelection(self):
