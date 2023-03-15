@@ -96,7 +96,7 @@ def rsPaste():
         if hasDuplicateOutput(node):
             convertToInput(node)
     for node in nuke.selectedNodes('Dot'):
-        if not outputExists(node):
+        if validateFetchInput(node) and not outputExists(node):
             createOutputFromInput(node)
         if validateFetchInput(node):
             id = getFetcherId(node)
