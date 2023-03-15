@@ -238,13 +238,13 @@ class InputFetcher(QtWidgets.QDialog):
         curNode.setInput(0, targetNode)
         curNode['hide_input'].setValue(True)
 
-    def setLabel(self, curNode, label_text):
+    def setLabel(self, node, label_text):
         font_size = 45
-        if curNode.Class() == 'BackdropNode':
+        if node.Class() == 'BackdropNode':
             font_size = 100
-        curNode['note_font_size'].setValue(font_size)
-        curNode['label'].setValue(label_text)
-        curNode['note_font'].setValue('Bold')
+        node['note_font_size'].setValue(font_size)
+        node['label'].setValue(label_text)
+        node['note_font'].setValue('Bold')
 
     def setEmptyLabel(self, node):
         node['name'].setValue('')
@@ -325,6 +325,11 @@ class InputFetcher(QtWidgets.QDialog):
             self.warningLabel.setText("CAN'T RENAME INPUT NODES.")
             return
 
+        if len(n) == 1 and nuke.selectedNode().Class() == 'BackdropNode':
+            self.setLabel(nuke.selectedNode(), input)
+            self.close()
+            return
+
         if len(n) == 1 and not self.isValidOutput(nuke.selectedNode()) and not self.inputIsCommand(input):
             if input.startswith(self.outputPrefix + self.separator):
                 if nuke.selectedNode().Class() == self.nodeClass:
@@ -359,7 +364,7 @@ class InputFetcher(QtWidgets.QDialog):
                     #update the OUTPUT and all INPUTs
                     self.close()
                     #here
-                elif input != 'TAG' and input != 'UNTAG':
+                elif input not in self.commands:
                     if self.isValidOutput(node):
                         self.warningLabel.setText("TRYING TO RENAME AN OUTPUT NODE WITH AN INVALID LABEL.  SYNTAX = OUT_PREFIX_LABEL")
                         return False
