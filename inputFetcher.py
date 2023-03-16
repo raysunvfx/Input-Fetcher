@@ -93,14 +93,14 @@ class InputFetcher(QtWidgets.QDialog):
             label = node['label'].getValue()
             return node['id'] and label.startswith(self.inputPrefix + self.separator) and label.count(self.separator) >= 2
         except NameError:
-            pass
+            return False
 
     def getOutputLabel(self, node):
         return node['label'].getValue().upper()
 
 
     def getOutputId(selfself, node):
-        return node['id'].getValue().upper()
+        return node['id'].getValue()
 
 
     def makeDict(self, name, ident, label):
@@ -120,7 +120,7 @@ class InputFetcher(QtWidgets.QDialog):
             if self.isValidOutput(node):
                     self.outputLabels.append(self.getOutputLabel(node))
                     self.outputNodes.append(node)
-                    self.outputInfo.append(self.makeDict(node.name(), node['id'].getValue(), node['label'].getValue()))
+                    self.outputInfo.append(self.makeDict(node.name(), self.getOutputId(node), self.getOutputLabel(node)))
 
 
     def findUniquePrefixes(self):
@@ -225,18 +225,34 @@ class InputFetcher(QtWidgets.QDialog):
         except:
             print('error')
 
-    def eventButtonClicked(self):
+    def convertInputToNewInput(self, node, newId):
+        try:
+            origId = node['id'].getValue()
+            if origId != newId:
+                node['id'].setValue(newId)
+        except NameError:
+            return False
 
-        print(self.sender().objectName())
+    def eventButtonClicked(self):
+        if not nuke.selectedNodes():
+            print('no nodes selected, createFetchNode from selected button')
+        for node in nuke.selectedNodes():
+            print('get id')
+            print('compare id with self.sender.objectName()')
+            #if not same id, then set selected nodes id to new id
+            #then, connect nodes by id
+            #and color nodes
         for item in self.outputInfo:
-            if item['id'] == self.sender().objectName():
-                node = self.createFetchNode(self.convertLabelToInput(item['label']), item['id'])
-                self.connectInput(node, nuke.toNode(item['name']))
+            newId = self.sender().objectName()
+            if item['id'] == newId:
+                fetchNode = self.createFetchNode(self.convertLabelToInput(item['label']), newId)
+                self.convertInputToNewInput(fetchNode, newId)
+                self.connectInput(fetchNode, nuke.toNode(item['name']))
             self.close()
 
-    def connectInput(self, curNode, targetNode):
-        curNode.setInput(0, targetNode)
-        curNode['hide_input'].setValue(True)
+    def connectInput(self, node, targetNode):
+        node.setInput(0, targetNode)
+        node['hide_input'].setValue(True)
 
     def setLabel(self, node, label_text):
         font_size = 45
@@ -246,8 +262,6 @@ class InputFetcher(QtWidgets.QDialog):
         node['label'].setValue(label_text)
         node['note_font'].setValue('Bold')
 
-    def setEmptyLabel(self, node):
-        node['name'].setValue('')
 
     def findOutputFromLabel(self, label):
         for node in nuke.allNodes(self.nodeClass):
@@ -255,17 +269,6 @@ class InputFetcher(QtWidgets.QDialog):
                 if node['label'].getValue().strip().upper() == label.upper():
                     return [node['label'].getValue(), node['id'].getValue()]
 
-
-    def findOutputFromId(self, id):
-        for info in self.outputInfo:
-            if info['id'] == id:
-                return info['name']
-
-    def getColorFromPrefix(self, label):
-        targetPrefix = label.split(self.separator)[1]
-        for prefix, color in self.prefixColorl.items():
-            if prefix == targetPrefix:
-                return color
 
     def updateOuputAndChildren(self, ident, label):
         for item in self.outputInfo:
@@ -311,11 +314,11 @@ class InputFetcher(QtWidgets.QDialog):
 
     def labelNode(self):
         input = self.labeller.text().upper()
+        n = nuke.selectedNodes()
+
         if self.duplicateLabelInput(input):
             self.warningLabel.setText(input + ' already exists.  Please enter a different name.')
             return
-
-        n = nuke.selectedNodes()
 
         if self.multipleOutputsSelected(n):
             self.warningLabel.setText("CAN'T RENAME MULTIPLE OUTPUTS AT THE SAME TIME.  RENAME ONE AT A TIME PLEASE!")
@@ -329,6 +332,11 @@ class InputFetcher(QtWidgets.QDialog):
             self.setLabel(nuke.selectedNode(), input)
             self.close()
             return
+
+        if len(n) == 1 and self.isValidOutput(nuke.selectedNode()) and self.validateLabelFormat(input):
+            self.updateOuputAndChildren(self.getOutputId(nuke.selectedNode()), input.upper())
+            return
+
 
         if len(n) == 1 and not self.isValidOutput(nuke.selectedNode()) and not self.inputIsCommand(input):
             if input.startswith(self.outputPrefix + self.separator):
@@ -357,14 +365,7 @@ class InputFetcher(QtWidgets.QDialog):
                 cmd = getattr(self, input.lower())
                 cmd(nuke.toNode(node.name()))
             if not self.isValidInput(node):
-                #if the current node is NOT an input
-                if self.isValidOutput(node) and self.validateLabelFormat(input):
-                    #if the current node is OUTPUT and the label is a valid format
-                    self.updateOuputAndChildren(self.fetchId(node), input)
-                    #update the OUTPUT and all INPUTs
-                    self.close()
-                    #here
-                elif input not in self.commands:
+                if input not in self.commands:
                     if self.isValidOutput(node):
                         self.warningLabel.setText("TRYING TO RENAME AN OUTPUT NODE WITH AN INVALID LABEL.  SYNTAX = OUT_PREFIX_LABEL")
                         return False
@@ -495,7 +496,6 @@ class InputFetcher(QtWidgets.QDialog):
         return label.count(self.separator) >= 2
 
     def createFetchNode(self, label, id=''):
-        #self.checkDuplciateLabel(label)
         if not nuke.selectedNodes():
             fetchNode = nuke.createNode(self.nodeClass)
         else:
@@ -512,7 +512,11 @@ class InputFetcher(QtWidgets.QDialog):
         except IndexError:
             return False
         if self.validateLabelFormat(label):
-            self.assignId(fetchNode, id)
+            try:
+                if fetchNode['id']:
+                    pass
+            except NameError:
+                self.assignId(fetchNode, id)
 
 
 
