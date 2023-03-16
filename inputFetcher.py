@@ -95,13 +95,16 @@ class InputFetcher(QtWidgets.QDialog):
         except NameError:
             return False
 
-    def getOutputLabel(self, node):
+    def getFetcherLabel(self, node):
         return node['label'].getValue().upper()
 
 
-    def getOutputId(selfself, node):
+    def getFetcherId(self, node):
         return node['id'].getValue()
 
+    def getFetcherPrefix(self, node):
+        if self.isValidInput(node) or self.isValidOutput(node):
+            return node['label'].getValue().split('_')[1]
 
     def makeDict(self, name, ident, label):
         return(
@@ -111,16 +114,12 @@ class InputFetcher(QtWidgets.QDialog):
                )
 
 
-    def getCatagory(self, label):
-        return label.split('_')[1]
-
-
     def collectOutputs(self):
         for node in nuke.allNodes(self.nodeClass):
             if self.isValidOutput(node):
-                    self.outputLabels.append(self.getOutputLabel(node))
+                    self.outputLabels.append(self.getFetcherLabel(node))
                     self.outputNodes.append(node)
-                    self.outputInfo.append(self.makeDict(node.name(), self.getOutputId(node), self.getOutputLabel(node)))
+                    self.outputInfo.append(self.makeDict(node.name(), self.getFetcherId(node), self.getFetcherLabel(node)))
 
 
     def findUniquePrefixes(self):
@@ -223,32 +222,44 @@ class InputFetcher(QtWidgets.QDialog):
             node['tile_color'].setValue(color)
             node['note_font_color'].setValue(color)
         except:
-            print('error')
+            node['tile_color'].setValue(0)
+            node['note_font_color'].setValue(0)
 
-    def convertInputToNewInput(self, node, newId):
+    def updateId(self, node, newId):
         try:
-            origId = node['id'].getValue()
-            if origId != newId:
+            if node['id'].getValue() != newId:
                 node['id'].setValue(newId)
         except NameError:
             return False
 
+    def updateLabel(self, node, newLabel):
+        try:
+            if node['label'].getValue() != newLabel:
+                node['label'].setValue(newLabel)
+        except NameError:
+            return False
+
+
     def eventButtonClicked(self):
-        if not nuke.selectedNodes():
-            print('no nodes selected, createFetchNode from selected button')
-        for node in nuke.selectedNodes():
-            print('get id')
-            print('compare id with self.sender.objectName()')
-            #if not same id, then set selected nodes id to new id
-            #then, connect nodes by id
-            #and color nodes
-        for item in self.outputInfo:
-            newId = self.sender().objectName()
-            if item['id'] == newId:
-                fetchNode = self.createFetchNode(self.convertLabelToInput(item['label']), newId)
-                self.convertInputToNewInput(fetchNode, newId)
-                self.connectInput(fetchNode, nuke.toNode(item['name']))
+        buttonId = [item['id'] for item in self.outputInfo if item['id'] == self.sender().objectName()][0]
+        buttonLabel = [item['label'] for item in self.outputInfo if item['id'] == self.sender().objectName()][0]
+        parent = self.getParentFromId(buttonId)
+
+        if nuke.selectedNodes():
+            for node in nuke.selectedNodes():
+                if self.isValidInput(node) and self.getFetcherId(node) != buttonId:
+                    self.updateId(node, buttonId)
+                    self.updateLabel(node, self.convertLabelToInput(buttonLabel))
+                    self.connectInput(node, parent)
+                    self.colorNodeByPrefix(node, self.getFetcherPrefix(node))
             self.close()
+            return True
+
+        fetchNode = self.createFetchNode(self.convertLabelToInput(buttonLabel), buttonId)
+        self.connectInput(fetchNode, parent)
+        self.close()
+        return True
+
 
     def connectInput(self, node, targetNode):
         node.setInput(0, targetNode)
@@ -261,14 +272,6 @@ class InputFetcher(QtWidgets.QDialog):
         node['note_font_size'].setValue(font_size)
         node['label'].setValue(label_text)
         node['note_font'].setValue('Bold')
-
-
-    def findOutputFromLabel(self, label):
-        for node in nuke.allNodes(self.nodeClass):
-            if self.isValidOutput(node):
-                if node['label'].getValue().strip().upper() == label.upper():
-                    return [node['label'].getValue(), node['id'].getValue()]
-
 
     def updateOuputAndChildren(self, ident, label):
         for item in self.outputInfo:
@@ -334,7 +337,7 @@ class InputFetcher(QtWidgets.QDialog):
             return
 
         if len(n) == 1 and self.isValidOutput(nuke.selectedNode()) and self.validateLabelFormat(input):
-            self.updateOuputAndChildren(self.getOutputId(nuke.selectedNode()), input.upper())
+            self.updateOuputAndChildren(self.getFetcherId(nuke.selectedNode()), input.upper())
             return
 
 
@@ -390,11 +393,6 @@ class InputFetcher(QtWidgets.QDialog):
     def convertLabelToInput(self, label):
         return label.replace(self.outputPrefix + self.separator, self.inputPrefix + self.separator)
 
-    def convertToInput(self, node):
-        label = node['label'].getValue().replace(self.outputPrefix, self.inputPrefix)
-        node['label'].setValue(label)
-
-
     def assignId(self, node, id=''):
         if not id:
             id = uuid.uuid4().hex[:16]
@@ -409,18 +407,10 @@ class InputFetcher(QtWidgets.QDialog):
 
 
     def getParentFromId(self, id):
-        result = []
-        try:
-            for node in nuke.allNodes('Dot'):
-                targetId = node['id'].getValue()
-                if id == targetId:
-                    result.append(node.name())
-        except NameError:
-            pass
-        return result[1]
+        for node in nuke.allNodes('Dot'):
+            if self.isValidOutput(node) and node['id'].getValue() == id:
+                return node
 
-    def fetchId(self, node):
-        return node['id'].getValue()
 
     def layoutTaggedNodes(self):
         if self.taggedNodes:
@@ -517,9 +507,6 @@ class InputFetcher(QtWidgets.QDialog):
                     pass
             except NameError:
                 self.assignId(fetchNode, id)
-
-
-
         return fetchNode
 
     def goFetch(self):
@@ -539,18 +526,5 @@ class InputFetcher(QtWidgets.QDialog):
 
 
 inputFetcher = InputFetcher()
-#inputFetcher.goFetch()
 nuke.menu('Nuke').addCommand('Edit/Input Fetcher', inputFetcher.goFetch, 'shift+n')
-
-# give all outputs a random id
-# when copy pasting OUTPUT node, first check if there's an identical id on another node, if yes, this is a duplicate OUTPUT node, and should be converted to an INPUT node, if not, then check if there's another node with the same label, if yes, that means we're pasting into a different script, and we conver the OUTPUT to an INPUT and connect to the pre-existing OUTPUT node, if neither, then that means we're pasting into a new script without this OUTPUT, and leave it as is
-
-# if label == self label, connect, then change self to input
-# if self is input node:
-# look for output by label and connect
-
-# nuke oncreate is not working with setInput(), look into modifying the native copy/paste functions inside of nuke
-
-#command: rename output, will rename selected output and all inputs
-#if copy/pasting a OUT node with input nodes, the inputs are still connected to the old OUT which will be converted to an IN ... maybe disconnect all copied nodes first and reconnect them all after the conversion step?
 
