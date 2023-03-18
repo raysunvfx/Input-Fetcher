@@ -337,6 +337,18 @@ class InputFetcher(QtWidgets.QDialog):
     def inputIsCommand(self, input):
         return input in self.commands
 
+    def multiple_default_node_selected(self, nodes):
+        default_node_counter = 0
+        try:
+            for node in nodes:
+                if node.Class() == self.nodeClass and not self.is_valid_output(node) and not self.is_valid_input(node):
+                    default_node_counter += 1
+                if default_node_counter == 2:
+                    raise StopIteration
+        except StopIteration:
+            return True
+        return False
+
 
     def labelNode(self):
         input = self.labeller.text().upper()
@@ -352,6 +364,11 @@ class InputFetcher(QtWidgets.QDialog):
             self.reset_labeller_state()
             return
 
+        if self.multiple_default_node_selected(n) and self.validateLabelFormat(input):
+            self.warningLabel.setText("CAN'T CREATE MORE THAN ONE OUTPUT AT THE SAME TIME!\nMULTIPLE {} NODES SELECTED!".format(self.nodeClass.upper()))
+            self.reset_labeller_state()
+            return
+
         if self.inputsSelected(n):
             self.warningLabel.setText("CAN'T RENAME INPUT NODES.")
             self.reset_labeller_state()
@@ -364,6 +381,11 @@ class InputFetcher(QtWidgets.QDialog):
 
         if len(n) == 1 and self.is_valid_output(nuke.selectedNode()) and self.validateLabelFormat(input):
             self.updateOuputAndChildren(self.getFetcherId(nuke.selectedNode()), input.upper())
+            self.close()
+            return
+
+        if len(n) == 1 and not self.is_valid_output(nuke.selectedNode()) and self.validateLabelFormat(input) and nuke.selectedNode().Class() == 'Dot':
+            self.createFetchNode(input, node=nuke.selectedNode())
             self.close()
             return
 
@@ -522,19 +544,21 @@ class InputFetcher(QtWidgets.QDialog):
         self.colorNodeByPrefix(node, self.get_prefix_from_label(label))
         self.connectInput(node, parent)
 
+    def hide_fetcher_knobs(self, node):
+        for knob in node.knobs():
+            if knob != 'id':
+                node[knob].setVisible(False)
+
 
     def createFetchNode(self, label, ident=None, node=None, parent=None):
-        # if not nuke.selectedNodes():
-        fetchNode = nuke.createNode(self.nodeClass)
-        # else:
-        #     fetchNode = nuke.selectedNode()
+        if not node:
+            fetchNode = nuke.createNode(self.nodeClass)
+            self.setLabel(fetchNode, label)
+        else:
+            fetchNode = node
+
         self.setLabel(fetchNode, label)
-        # fetchNode['label'].setValue(label)
-        # fetchNode['note_font_size'].setValue(45)
-        # fetchNode['note_font'].setValue('Bold')
-        for knob in fetchNode.knobs():
-            if knob != 'id':
-                fetchNode[knob].setVisible(False)
+        self.hide_fetcher_knobs(fetchNode)
         try:
             prefix = label.split(self.separator)[1].upper()
             self.colorNodeByPrefix(fetchNode, prefix)
