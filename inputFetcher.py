@@ -463,7 +463,7 @@ class InputFetcher(QtWidgets.QDialog):
         if self.taggedNodes:
             labelFont = QtGui.QFont(self.masterFont, 15, QtGui.QFont.Bold)
             buttonFont = QtGui.QFont('PMingLiU-ExtB', 10, QtGui.QFont.Bold)
-
+            #get rid of this stupid drop shadow arrrrrg
             label = QtWidgets.QLabel('TAGGED')
             label.setFont(labelFont)
 
