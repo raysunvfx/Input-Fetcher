@@ -471,6 +471,9 @@ class InputFetcher(QtWidgets.QDialog):
         print(luminance)
         return luminance
 
+    def has_custom_tile_color(self, node):
+        return bool(node['tile_color'].getValue())
+
     def layoutTaggedNodes(self):
         if self.taggedNodes:
             labelFont = QtGui.QFont(self.masterFont, 15, QtGui.QFont.Bold)
@@ -484,13 +487,16 @@ class InputFetcher(QtWidgets.QDialog):
 
             for node in self.taggedNodes:
                 name = node.name()
-                node_default_color = nuke.defaultNodeColor(node.Class())
-                node_default_rgb_color = self.interface2rgb(node_default_color)
-                if self.calc_rgb_luminance(node_default_rgb_color) < .5:
+                if self.has_custom_tile_color(node):
+                    node_tile_color = int(node['tile_color'].getValue())
+                else:
+                    node_tile_color = nuke.defaultNodeColor(node.Class())
+                node_rgb_tile_color = self.interface2rgb(node_tile_color)
+                if self.calc_rgb_luminance(node_rgb_tile_color) < .5:
                     text_color = 'white'
                 else:
                     text_color = 'black'
-                node_default_hex_code = self.rgb_to_hex(node_default_rgb_color)
+                node_default_hex_code = self.rgb_to_hex(node_rgb_tile_color)
                 button = QtWidgets.QPushButton(name)
                 button.setStyleSheet("background-color : {}; color : {}".format(node_default_hex_code, text_color))
                 button.setFont(buttonFont)
