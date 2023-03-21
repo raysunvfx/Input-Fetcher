@@ -46,7 +46,7 @@ class InputFetcher(QtWidgets.QDialog):
         }
 
         # Config commands
-        self.commands = ['TAG', 'UNTAG']
+        self.commands = ['TAG', 'UNTAG', 'TAGAS']
         # Config layout
         self.mainLayout = QtWidgets.QVBoxLayout()
 
@@ -335,7 +335,7 @@ class InputFetcher(QtWidgets.QDialog):
             return foundInput
 
     def inputIsCommand(self, input):
-        return input in self.commands
+        return input.split(' ')[0] in self.commands
 
     def multiple_default_node_selected(self, nodes):
         default_node_counter = 0
@@ -403,8 +403,11 @@ class InputFetcher(QtWidgets.QDialog):
         selected_node_classes = []
         for node in n:
             if self.inputIsCommand(input):
-                cmd = getattr(self, input.lower())
-                cmd(nuke.toNode(node.name()))
+                cmd = getattr(self, input.split(' ')[0].lower())
+                suffix = ' '.join(input.split(' ')[1:])
+                cmd(nuke.toNode(node.name()), suffix)
+                self.close()
+                return True
             selected_node_classes.append(node.Class())
             if self.nodeClass not in selected_node_classes and self.validateLabelFormat(input):
                 self.warningLabel.setText("I DON'T KNOW WHICH NODE YOU WANT TO CREATE AN OUTPUT FOR.\nPLEASE HAVE ONLY ONE NODE SELECTED!")
@@ -423,12 +426,19 @@ class InputFetcher(QtWidgets.QDialog):
                             self.createFetchNode(input, node=node)
                 self.close()
 
-    def tag(self, node):
+    def tag(self, node, suffix = None):
         if not node.knob(self.tagKnob):
             knob = nuke.Boolean_Knob(self.tagKnob, self.tagKnob, 1)
             node.addKnob(knob)
             knob.setVisible(False)
+            if suffix:
+                suffix_knob = nuke.String_Knob('suffix')
+                node.addKnob(suffix_knob)
+                node['suffix'].setValue(suffix)
+                suffix_knob.setVisible(False)
             node.knob(0).setFlag(0)
+        else:
+            node['suffix'].setValue(suffix)
 
     def findTaggedNodes(self):
         for node in nuke.allNodes():
@@ -468,7 +478,6 @@ class InputFetcher(QtWidgets.QDialog):
 
     def calc_rgb_luminance(self, rgb):
         luminance = rgb[0] * 0.2126 + rgb[1] * 0.7152 + rgb[2] * 0.0722
-        print(luminance)
         return luminance
 
     def has_custom_tile_color(self, node):
@@ -486,7 +495,12 @@ class InputFetcher(QtWidgets.QDialog):
             buttonsLayoutRef = getattr(self, '{}ButtonsLayout'.format('tagged'))
 
             for node in self.taggedNodes:
-                name = node.name()
+                for knob in node.knobs():
+                    if 'suffix' == knob:
+                        name = node['suffix'].getValue()
+                        break
+                    else:
+                        name = node.name()
                 if self.has_custom_tile_color(node):
                     node_tile_color = int(node['tile_color'].getValue())
                 else:
@@ -498,6 +512,7 @@ class InputFetcher(QtWidgets.QDialog):
                     text_color = 'black'
                 node_default_hex_code = self.rgb_to_hex(node_rgb_tile_color)
                 button = QtWidgets.QPushButton(name)
+                button.setObjectName(node.name())
                 button.setStyleSheet("background-color : {}; color : {}".format(node_default_hex_code, text_color))
                 button.setFont(buttonFont)
                 button.clicked.connect(self.taggedButton)
@@ -514,22 +529,19 @@ class InputFetcher(QtWidgets.QDialog):
 
     def taggedButton(self):
         # get pressed button id and copy/paste the node
-        senderName = self.sender().text()
+        senderName = self.sender().objectName()
         self.clearSelection()
-        for node in nuke.allNodes():
-            if senderName == node.name():
-                node.setSelected(True)
+        node = nuke.toNode(senderName)
+        node.setSelected(True)
         nuke.duplicateSelectedNodes()
         self.untag(nuke.selectedNode())
 
         self.close()
 
-    def untag(self, node):
-        if node.knob(self.tagKnob):
-            for x in range(node.numKnobs()):
-                knob = node.knob(x)
-                if knob.name() == self.tagKnob:
-                    node.removeKnob(knob)
+    def untag(self, node, Null = None):
+        for knob in node.knobs():
+            if 'suffix' == knob or self.tagKnob == knob:
+                node.removeKnob(node.knob(knob))
 
     def clearSelection(self):
         allNodes = nuke.allNodes()
