@@ -389,10 +389,13 @@ class InputFetcher(QtWidgets.QDialog):
             self.close()
             return
 
-        if len(n) == 1 and not self.is_valid_output(nuke.selectedNode()) and self.validateLabelFormat(input) and nuke.selectedNode().Class() == 'Dot':
-            self.createFetchNode(input, node=nuke.selectedNode())
-            self.close()
-            return
+        if len(n) == 1 and not self.is_valid_output(nuke.selectedNode()) and not self.is_valid_input(nuke.selectedNode()) and self.validateLabelFormat(input):
+            if nuke.selectedNode().Class() == 'Dot':
+                self.createFetchNode(input, node=nuke.selectedNode())
+                self.close()
+                return
+            else:
+                self.createFetchNode(input)
 
         for node in n:
             if self.inputIsCommand(input):
