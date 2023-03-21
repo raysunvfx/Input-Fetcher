@@ -358,26 +358,27 @@ class InputFetcher(QtWidgets.QDialog):
             # print("\nFailed at {}.".format(inputFetcher.setLabel.__name__)) this prints the name of the function
             self.createFetchNode(input)
             self.close()
+            return False
 
         if self.is_duplicate_label(input):
             self.warningLabel.setText(input + ' already exists.  Please enter a different name.')
             self.reset_labeller_state()
-            return
+            return False
 
         if self.multiple_outputs_selected(n):
             self.warningLabel.setText("CAN'T RENAME MULTIPLE OUTPUTS AT THE SAME TIME.  RENAME ONE AT A TIME PLEASE!")
             self.reset_labeller_state()
-            return
+            return False
 
         if self.multiple_default_node_selected(n) and self.validateLabelFormat(input):
             self.warningLabel.setText("CAN'T CREATE MORE THAN ONE OUTPUT AT THE SAME TIME!\nMULTIPLE {} NODES SELECTED!".format(self.nodeClass.upper()))
             self.reset_labeller_state()
-            return
+            return False
 
         if self.input_nodes_selected(n):
             self.warningLabel.setText("CAN'T RENAME INPUT NODES.")
             self.reset_labeller_state()
-            return
+            return False
 
         if len(n) == 1 and nuke.selectedNode().Class() == 'BackdropNode':
             self.set_label(nuke.selectedNode(), input)
@@ -396,11 +397,19 @@ class InputFetcher(QtWidgets.QDialog):
                 return
             else:
                 self.createFetchNode(input)
+                self.close()
+                return
 
+        selected_node_classes = []
         for node in n:
             if self.inputIsCommand(input):
                 cmd = getattr(self, input.lower())
                 cmd(nuke.toNode(node.name()))
+            selected_node_classes.append(node.Class())
+            if self.nodeClass not in selected_node_classes and self.validateLabelFormat(input):
+                self.warningLabel.setText("I DON'T KNOW WHICH NODE YOU WANT TO CREATE AN OUTPUT FOR.\nPLEASE HAVE ONLY ONE NODE SELECTED!")
+                self.reset_labeller_state()
+                return False
             if not self.is_valid_input(node):
                 if input not in self.commands:
                     if self.is_valid_output(node):
