@@ -90,21 +90,31 @@ def hideFetcherKnobs(node):
         if knob != 'id':
             node[knob].setVisible(False)
 
+def fetcher_is_tagged(node):
+    for knob in node.knobs():
+        if knob == 'suffix' or knob == 'inputFetcherTag':
+            return True
+    return False
+
 def rsPaste():
     nuke.nodePaste('%clipboard%')
     for node in nuke.selectedNodes('Dot'):
         if hasDuplicateOutput(node):
             convertToInput(node)
-    for node in nuke.selectedNodes('Dot'):
         if validateFetchInput(node) and not outputExists(node):
             createOutputFromInput(node)
         if validateFetchInput(node):
             id = getFetcherId(node)
             targetNode = findFetcherOutputFrom(id, node.name())
             connectFetchInput(node, targetNode)
-            hideFetchInput(node)
-    for node in nuke.selectedNodes('Dot'):
         hideFetcherKnobs(node)
+    for node in nuke.selectedNodes():
+        if fetcher_is_tagged(node):
+            try:
+                node.removeKnob(node.knob('suffix'))
+                node.removeKnob(node.knob('inputFetcherTag'))
+            except ValueError:
+                pass
 
 
 
