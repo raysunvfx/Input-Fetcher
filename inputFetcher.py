@@ -385,7 +385,7 @@ class InputFetcher(QtWidgets.QDialog):
             self.reset_labeller_state()
             return False
 
-        if len(n) == 1 and nuke.selectedNode().Class() == 'BackdropNode':
+        if len(n) == 1 and nuke.selectedNode().Class() == 'BackdropNode' and not self.inputIsCommand(input):
             self.set_label(nuke.selectedNode(), input)
             self.close()
             return
@@ -405,14 +405,16 @@ class InputFetcher(QtWidgets.QDialog):
                 self.close()
                 return
 
-        selected_node_classes = []
-        for node in n:
-            if self.inputIsCommand(input):
+        if self.inputIsCommand(input):
+            for node in n:
                 cmd = getattr(self, input.split(' ')[0].lower())
                 suffix = ' '.join(input.split(' ')[1:])
                 cmd(nuke.toNode(node.name()), suffix)
-                self.close()
-                return True
+            self.close()
+            return
+
+        selected_node_classes = []
+        for node in n:
             selected_node_classes.append(node.Class())
             if self.nodeClass not in selected_node_classes and self.validateLabelFormat(input):
                 self.warningLabel.setText("I DON'T KNOW WHICH NODE YOU WANT TO CREATE AN OUTPUT FOR.\nPLEASE HAVE ONLY ONE NODE SELECTED!")
@@ -432,6 +434,11 @@ class InputFetcher(QtWidgets.QDialog):
                 self.close()
 
     def tag(self, node, suffix = None):
+        try:
+            node.removeKnob(node.knob('suffix'))
+            node.removeKnob(node.knob(self.tagKnob))
+        except ValueError:
+            pass
         if not node.knob(self.tagKnob):
             knob = nuke.Boolean_Knob(self.tagKnob, self.tagKnob, 1)
             node.addKnob(knob)
@@ -441,18 +448,13 @@ class InputFetcher(QtWidgets.QDialog):
                 node.addKnob(suffix_knob)
                 node['suffix'].setValue(suffix)
                 suffix_knob.setVisible(False)
-            node.knob(0).setFlag(0)
-        elif node.knob(self.tagKnob) and not suffix:
-            try:
-                node.removeKnob(node.knob('suffix'))
-            except ValueError:
-                pass
-            return
+            node.knob(0).setFlag(0) # or node.setTab(0)
         elif node.knob(self.tagKnob) and suffix:
             try:
                 suffix_knob = nuke.String_Knob('suffix')
                 node.addKnob(suffix_knob)
                 node['suffix'].setValue(suffix)
+                suffix_knob.setVisible(False)
             except ValueError:
                 pass
         else:
@@ -550,10 +552,16 @@ class InputFetcher(QtWidgets.QDialog):
         senderName = self.sender().objectName()
         self.clearSelection()
         node = nuke.toNode(senderName)
-        node.setSelected(True)
-        nuke.duplicateSelectedNodes()
-        self.untag(nuke.selectedNode())
-
+        if node.Class() != 'BackdropNode':
+            node.setSelected(True)
+            nuke.duplicateSelectedNodes()
+            self.untag(nuke.selectedNode())
+        else:
+            node.selectNodes()
+            node.setSelected(True)
+            nuke.duplicateSelectedNodes()
+            for node in nuke.selectedNodes():
+                self.untag(node)
         self.close()
 
     def untag(self, node, *args):
