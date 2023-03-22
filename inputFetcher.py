@@ -442,6 +442,19 @@ class InputFetcher(QtWidgets.QDialog):
                 node['suffix'].setValue(suffix)
                 suffix_knob.setVisible(False)
             node.knob(0).setFlag(0)
+        elif node.knob(self.tagKnob) and not suffix:
+            try:
+                node.removeKnob(node.knob('suffix'))
+            except ValueError:
+                pass
+            return
+        elif node.knob(self.tagKnob) and suffix:
+            try:
+                suffix_knob = nuke.String_Knob('suffix')
+                node.addKnob(suffix_knob)
+                node['suffix'].setValue(suffix)
+            except ValueError:
+                pass
         else:
             node['suffix'].setValue(suffix)
 
@@ -543,7 +556,7 @@ class InputFetcher(QtWidgets.QDialog):
 
         self.close()
 
-    def untag(self, node, Null = None):
+    def untag(self, node, *args):
         for knob in node.knobs():
             if 'suffix' == knob or self.tagKnob == knob:
                 node.removeKnob(node.knob(knob))
