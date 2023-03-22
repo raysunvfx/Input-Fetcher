@@ -96,6 +96,13 @@ def fetcher_is_tagged(node):
             return True
     return False
 
+def untag_fetcher(node):
+    try:
+        node.removeKnob(node.knob('suffix'))
+        node.removeKnob(node.knob('inputFetcherTag'))
+    except ValueError:
+        pass
+
 def rsPaste():
     nuke.nodePaste('%clipboard%')
     for node in nuke.selectedNodes('Dot'):
@@ -110,12 +117,7 @@ def rsPaste():
         hideFetcherKnobs(node)
     for node in nuke.selectedNodes():
         if fetcher_is_tagged(node):
-            try:
-                node.removeKnob(node.knob('suffix'))
-                node.removeKnob(node.knob('inputFetcherTag'))
-            except ValueError:
-                pass
-
+            untag_fetcher(node)
 
 
 nuke.menu('Nuke').addCommand('Edit/rsCopy', rsCopy, 'ctrl+c')
