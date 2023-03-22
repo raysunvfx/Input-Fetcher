@@ -264,10 +264,15 @@ class InputFetcher(QtWidgets.QDialog):
                     self.updateLabel(node, self.convertLabelToInput(buttonLabel))
                     self.connectInput(node, parent)
                     self.colorNodeByPrefix(node, self.getFetcherPrefix(node))
+                    self.close()
+                    return True
+                elif self.is_valid_input(node) and self.getFetcherId(node) == buttonId:
+                    self.close()
+                    return True
                 elif node.Class() == 'Dot':
                     self.convert_default_node_to_input(node, buttonLabel,buttonId, parent)
-            self.close()
-            return True
+                    self.close()
+                    return True
 
         fetchNode = self.createFetchNode(self.convertLabelToInput(buttonLabel), buttonId)
         self.connectInput(fetchNode, parent)
