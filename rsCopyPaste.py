@@ -1,28 +1,29 @@
 import nuke
 import nukescripts
+import config
+import utils
 
+
+input_fetcher_class = config._NODE_CLASS
 
 def validateFetchInput(node):
     inputPrefix = 'IN_'
     label = node['label'].getValue()[:3]
-    if inputPrefix in label and node['id']:
+    if inputPrefix in label and node['inputFetcherId']:
         return True
 
 
 def validateFetchOutput(node):
     try:
-        if node['label'].getValue().startswith('OUT_') and node['id']:
+        if node['label'].getValue().startswith('OUT_') and node['inputFetcherId']:
             return True
     except NameError:
         return False
 
-def getFetcherId(node):
-    return node['id'].getValue()
-
 def findFetcherOutputFrom(id, selfName):
-    for node in nuke.allNodes('Dot'):
+    for node in nuke.allNodes(input_fetcher_class):
         if validateFetchOutput(node) and node.name() != selfName:
-            tmpId = getFetcherId(node)
+            tmpId = utils.InputFetcherUtils().get_fetcher_id(node)
             if tmpId == id:
                 return node
 
@@ -31,36 +32,38 @@ def convertToInput(node):
     node['label'].setValue(label)
 
 def outputExists(inputNode):
-    for node in nuke.allNodes('Dot'):
+    for node in nuke.allNodes(input_fetcher_class):
         try:
-            if inputNode['id'].getValue() == node['id'].getValue() and validateFetchOutput(node) and validateFetchInput(inputNode) or validateFetchOutput(inputNode):
+            if inputNode['inputFetcherId'].getValue() == node['inputFetcherId'].getValue() and validateFetchOutput(node) and validateFetchInput(inputNode) or validateFetchOutput(inputNode):
                 return True
         except NameError:
             pass
     return False
 
 def hasDuplicateOutput(output):
-    for node in nuke.allNodes('Dot'):
+    for node in nuke.allNodes(input_fetcher_class):
         try:
-            if output['id'].getValue() == node['id'].getValue() and validateFetchOutput(node) and node != output:
+            if output['inputFetcherId'].getValue() == node['inputFetcherId'].getValue() and validateFetchOutput(node) and node != output:
                 return True
         except NameError:
             pass
     return False
 
-def createOutputFromInput(inputNode):
-    output = nuke.nodes.Dot(label = inputNode['label'].getValue().replace('IN_', 'OUT_'), note_font_size = 45, note_font = 'Bold')
-    knob = nuke.String_Knob('id')
+def createOutputFromInput(input_node):
+    node_class_obj = getattr(nuke.nodes, input_fetcher_class)
+    output = node_class_obj(label = input_node['label'].getValue().replace('IN_', 'OUT_'), note_font_size = 45, note_font = 'Bold')
+    knob = nuke.String_Knob('inputFetcherId')
     output.addKnob(knob)
-    output['id'].setValue(inputNode['id'].getValue())
-    output['id'].setEnabled(False)
-    output['tile_color'].setValue(int(inputNode['tile_color'].getValue()))
-    output['note_font_color'].setValue(int(inputNode['tile_color'].getValue()))
+    output['inputFetcherId'].setValue(input_node['inputFetcherId'].getValue())
+    output['inputFetcherId'].setEnabled(False)
+    output['tile_color'].setValue(int(input_node['tile_color'].getValue()))
+    output['note_font_color'].setValue(int(input_node['tile_color'].getValue()))
+    utils.InputFetcherUtils().label_as_name(output)
     for knob in output.knobs():
-        if knob != 'id':
+        if knob != 'inputFetcherId':
             output[knob].setVisible(False)
-    xPos = inputNode['xpos'].getValue()
-    yPos = inputNode['ypos'].getValue()
+    xPos = input_node['xpos'].getValue()
+    yPos = input_node['ypos'].getValue()
     output['xpos'].setValue(xPos)
     output['ypos'].setValue(yPos - 200)
 
@@ -68,52 +71,45 @@ def appendParentName():
     parent = nuke.text_knob(nuke.thisNode().name())
     nuke.thisNode().addKnob(parent)
 
-def connectFetchInput(node, targetNode):
-    node.setInput(0, targetNode)
-
-def hideFetchInput(node):
-    node['hide_input'].setValue(True)
-
 def rsCopy():
     if not nuke.selectedNodes():
         return False
     nuke.nodeCopy('%clipboard%')
-    for node in nuke.selectedNodes('Dot'):
+    for node in nuke.selectedNodes(input_fetcher_class):
         if validateFetchInput(node):
-            print('got here')
-            id = getFetcherId(node)
+            id = utils.InputFetcherUtils().get_fetcher_id(node)
             targetNode = findFetcherOutputFrom(id, node.name())
-            connectFetchInput(node, targetNode)
+            utils.InputFetcherUtils().connect_input(node, targetNode)
 
 def hideFetcherKnobs(node):
     for knob in node.knobs():
-        if knob != 'id':
+        if knob != 'inputFetcherId':
             node[knob].setVisible(False)
 
 def fetcher_is_tagged(node):
     for knob in node.knobs():
-        if knob == 'suffix' or knob == 'inputFetcherTag':
+        if knob == 'inputFetcherSuffix' or knob == 'inputFetcherTag':
             return True
     return False
 
 def untag_fetcher(node):
     try:
-        node.removeKnob(node.knob('suffix'))
+        node.removeKnob(node.knob('inputFetcherSuffix'))
         node.removeKnob(node.knob('inputFetcherTag'))
     except ValueError:
         pass
 
 def rsPaste():
     nuke.nodePaste('%clipboard%')
-    for node in nuke.selectedNodes('Dot'):
+    for node in nuke.selectedNodes(input_fetcher_class):
         if hasDuplicateOutput(node):
             convertToInput(node)
         if validateFetchInput(node) and not outputExists(node):
             createOutputFromInput(node)
         if validateFetchInput(node):
-            id = getFetcherId(node)
+            id = utils.InputFetcherUtils().get_fetcher_id(node)
             targetNode = findFetcherOutputFrom(id, node.name())
-            connectFetchInput(node, targetNode)
+            utils.InputFetcherUtils().connect_input(node, targetNode)
         hideFetcherKnobs(node)
     for node in nuke.selectedNodes():
         if fetcher_is_tagged(node):
