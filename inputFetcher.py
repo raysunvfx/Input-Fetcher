@@ -226,13 +226,6 @@ class InputFetcher(QtWidgets.QDialog):
         except NameError:
             return False
 
-    def updateLabel(self, node, newLabel):
-        try:
-            if node['label'].getValue() != newLabel:
-                node['label'].setValue(newLabel)
-        except NameError:
-            return False
-
     def reset_labeller_state(self):
         QtCore.QTimer.singleShot(0, self.labeller.setFocus)
         self.labeller.selectAll()
@@ -254,7 +247,7 @@ class InputFetcher(QtWidgets.QDialog):
             for node in nuke.selectedNodes():
                 if self.is_valid_input(node) and utils.InputFetcherUtils().get_fetcher_id(node) != buttonId:
                     self.updateId(node, buttonId)
-                    self.updateLabel(node, self.convertLabelToInput(buttonLabel))
+                    utils.InputFetcherUtils().update_label(node, self.convertLabelToInput(buttonLabel))
                     utils.InputFetcherUtils().connect_input(node, parent)
                     self.colorNodeByPrefix(node, self.getFetcherPrefix(node))
                     self.close()
@@ -347,10 +340,26 @@ class InputFetcher(QtWidgets.QDialog):
         input = self.labeller.text().upper()
         n = nuke.selectedNodes()
 
+        if self.inputIsCommand(input):
+            for node in n:
+                if self.is_valid_input(node) or self.is_valid_output(node):
+                    self.warningLabel.setText("CAN'T TAG INPUT OR OUTPUT NODES.\nPLEASE CHECK YOUR SELECTION!")
+                    return
+                cmd = getattr(self, input.split(' ')[0].lower())
+                suffix = ' '.join(input.split(' ')[1:])
+                cmd(nuke.toNode(node.name()), suffix)
+            self.close()
+            return
+
         if not n:
             # print("\nFailed at {}.".format(inputFetcher.setLabel.__name__)) this prints the name of the function
             self.createFetchNode(input)
             self.close()
+            return False
+
+        if self.input_nodes_selected(n):
+            self.warningLabel.setText("CAN'T RENAME INPUT NODES.")
+            self.reset_labeller_state()
             return False
 
         if self.is_duplicate_label(input):
@@ -370,10 +379,6 @@ class InputFetcher(QtWidgets.QDialog):
             self.reset_labeller_state()
             return False
 
-        if self.input_nodes_selected(n):
-            self.warningLabel.setText("CAN'T RENAME INPUT NODES.")
-            self.reset_labeller_state()
-            return False
 
         if len(n) == 1 and nuke.selectedNode().Class() == 'BackdropNode' and not self.inputIsCommand(input):
             self.set_label(nuke.selectedNode(), input)
@@ -396,14 +401,6 @@ class InputFetcher(QtWidgets.QDialog):
                 self.createFetchNode(input)
                 self.close()
                 return
-
-        if self.inputIsCommand(input):
-            for node in n:
-                cmd = getattr(self, input.split(' ')[0].lower())
-                suffix = ' '.join(input.split(' ')[1:])
-                cmd(nuke.toNode(node.name()), suffix)
-            self.close()
-            return
 
         selected_node_classes = []
         for node in n:
@@ -539,28 +536,12 @@ class InputFetcher(QtWidgets.QDialog):
             self.mainLayout.addWidget(labelDivider)
             self.mainLayout.addLayout(buttonsLayoutRef)
 
-    def duplicate_expression_linked(self, node):
-        node.setSelected(True)
-        nuke.duplicateSelectedNodes()
-
-        ignoreKnobs = ['onDestroy', 'bookmark', 'autolabel', 'selected', 'rootNodeUpdated', 'help', 'updateUI',
-                       'onCreate', 'icon', 'xpos', 'ypos', 'panelDropped', 'maskFromFlag', 'name', 'maskFrom',
-                       'indicators', 'process_mask', 'label', 'knobChanged']
-
-        for knob in nuke.selectedNode().knobs():
-            if not any(item in knob for item in ignoreKnobs):
-                nuke.selectedNode()[knob].setExpression('{}.{}'.format(node.name(), knob))
-        nuke.selectedNode()['label'].setValue('CHILD OF {}'.format(node.name()))
-
     def taggedButton(self):
-        # get pressed button id and copy/paste the node
         senderName = self.sender().objectName()
-        self.clearSelection()
+        utils.InputFetcherUtils().clear_selection()
         node = nuke.toNode(senderName)
         if node.Class() != 'BackdropNode':
-            # node.setSelected(True)
-            # nuke.duplicateSelectedNodes()
-            self.duplicate_expression_linked(node)
+            utils.InputFetcherUtils().duplicate_expression_linked(node)
             self.untag(nuke.selectedNode())
         else:
             node.selectNodes()
@@ -575,10 +556,6 @@ class InputFetcher(QtWidgets.QDialog):
             if 'inputFetcherSuffix' == knob or self.tag_knob == knob:
                 node.removeKnob(node.knob(knob))
 
-    def clearSelection(self):
-        allNodes = nuke.allNodes()
-        for node in allNodes:
-            node.setSelected(False)
 
     def resetLayout(self, layout):
         self.resize(config._WINDOW_SIZE_WIDTH, config._WINDOW_SIZE_HEIGHT)
@@ -612,9 +589,6 @@ class InputFetcher(QtWidgets.QDialog):
         for knob in node.knobs():
             if knob != self.id_knob:
                 node[knob].setVisible(False)
-
-    def validateLabelFormat(self, label):
-        return label.count(self.separator) >= 2
 
     def createFetchNode(self, label, ident=None, node=None, parent=None):
         if not node:
