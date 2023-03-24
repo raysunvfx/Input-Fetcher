@@ -539,14 +539,28 @@ class InputFetcher(QtWidgets.QDialog):
             self.mainLayout.addWidget(labelDivider)
             self.mainLayout.addLayout(buttonsLayoutRef)
 
+    def duplicate_expression_linked(self, node):
+        node.setSelected(True)
+        nuke.duplicateSelectedNodes()
+
+        ignoreKnobs = ['onDestroy', 'bookmark', 'autolabel', 'selected', 'rootNodeUpdated', 'help', 'updateUI',
+                       'onCreate', 'icon', 'xpos', 'ypos', 'panelDropped', 'maskFromFlag', 'name', 'maskFrom',
+                       'indicators', 'process_mask', 'label', 'knobChanged']
+
+        for knob in nuke.selectedNode().knobs():
+            if not any(item in knob for item in ignoreKnobs):
+                nuke.selectedNode()[knob].setExpression('{}.{}'.format(node.name(), knob))
+        nuke.selectedNode()['label'].setValue('CHILD OF {}'.format(node.name()))
+
     def taggedButton(self):
         # get pressed button id and copy/paste the node
         senderName = self.sender().objectName()
         self.clearSelection()
         node = nuke.toNode(senderName)
         if node.Class() != 'BackdropNode':
-            node.setSelected(True)
-            nuke.duplicateSelectedNodes()
+            # node.setSelected(True)
+            # nuke.duplicateSelectedNodes()
+            self.duplicate_expression_linked(node)
             self.untag(nuke.selectedNode())
         else:
             node.selectNodes()
