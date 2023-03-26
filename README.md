@@ -40,8 +40,9 @@ To create an OUTPUT, we need to use this syntax:<br>
 </p>
 
 Here are the default prefixes that Input-Fetcher recognizes:
+This text will be **green**{: style="color: green"}.
 
-<span style='color:green'>PLATE<br></span>
+PLATE<br>
 MATTE<br>
 RENDER<br>
 DEEP<br>
