@@ -5,18 +5,20 @@
 Input-Fetcher is a node organization system for the Foundry Nuke, which works on the idea of INPUTs and OUTPUTs.
 <br>
 
-## FAQ commands:</b>
-Tag examples:</b>
-'tag' - default tag command, will use tagged node's name as label.</b>
-'tag new_label' - will use 'new_label' as tagged node's label.</b>
-'untag' - untag node.</b>
-</b>
-Fetch examples:</b>
-'OUT_PLATE_NATIVE' - create an output for category 'PLATE' named 'NATIVE'.</b>
-'OUT_CAM_MAIN' - create an output for category 'CAM' named 'MAIN'.</b>
-'OUT_MATTE_FG_CHAR_01' - creates an output for category 'MATTE' named 'FG_CHAR_01'</b>
-'OUT_SHIP_FLAG_03' - creates an output for category 'SHIP' named 'FLAG_03'.</b>
-</b></b>
+## FAQ commands:</br>
+Tag examples:</br>
+'tag' - default tag command, will use tagged node's name as label.</br>
+'tag new_label' - will use 'new_label' as tagged node's label.</br>
+'tag lens dirt 35mm' - will use 'lens dirt 35mm' as tagged node's label.</br>
+'untag' - untag node.</br>
+</br>
+Fetch examples:</br>
+'OUT_PLATE_NATIVE' - create an output for category 'PLATE' named 'NATIVE'.</br>
+'OUT_CAM_MAIN' - create an output for category 'CAM' named 'MAIN'.</br>
+'OUT_MATTE_FG_CHAR_01' - creates an output for category 'MATTE' named 'FG_CHAR_01'</br>
+'OUT_SHIP_FLAG_03' - creates an output for category 'SHIP' named 'FLAG_03'.</br>
+</br>
+</br>
 ## How to use:
 
 To call Input-Fetcher, use the hotkey "SHIFT + N" in Nuke:
