@@ -5,7 +5,7 @@
 Input-Fetcher is a node organization system for the Foundry Nuke, which works on the idea of INPUTs and OUTPUTs.
 <br>
 
-## FAQ commands:</br>
+## Quick commands guide:</br>
 Tag examples:</br>
 'tag' - default tag command, will use tagged node's name as label.</br>
 'tag new_label' - will use 'new_label' as tagged node's label.</br>
