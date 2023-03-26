@@ -4,7 +4,7 @@ import config
 import utils
 
 
-input_fetcher_class = config._NODE_CLASS
+input_fetcher_class = 'Dot'
 
 def validateFetchInput(node):
     inputPrefix = 'IN_'
@@ -116,5 +116,5 @@ def rsPaste():
             untag_fetcher(node)
 
 
-nuke.menu('Nuke').addCommand('Edit/rsCopy', rsCopy, 'ctrl+c')
-nuke.menu('Nuke').addCommand('Edit/rsPaste', rsPaste, 'ctrl+v')
+nuke.menu('Nuke').addCommand('Edit/Input_Fetcher_Copy', rsCopy, 'ctrl+c')
+nuke.menu('Nuke').addCommand('Edit/Input_Fetcher_Paste', rsPaste, 'ctrl+v')

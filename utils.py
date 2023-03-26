@@ -1,8 +1,10 @@
 import re
 import nuke
 
-
 class InputFetcherUtils():
+    def __init__(self):
+        self.input_fetcher_prev_input = None
+
     def label_as_name(self, node):
         node['autolabel'].setValue("nuke.thisNode()['label'].getValue()")
 
@@ -44,3 +46,35 @@ class InputFetcherUtils():
                 node['label'].setValue(newLabel)
         except NameError:
             return False
+
+    def zoom_to_parent(self):
+        try:
+            if len(nuke.selectedNodes()) == 1:
+                if 'IN_' not in nuke.selectedNode()['label'].getValue() and 'OUT_' not in nuke.selectedNode()[
+                    'label'].getValue():
+                    self.input_fetcher_prev_input = None
+                    return False
+                if self.input_fetcher_prev_input:
+                    if nuke.selectedNode()['inputFetcherId'].getValue() != self.input_fetcher_prev_input[
+                        'inputFetcherId'].getValue():
+                        self.input_fetcher_prev_input = None
+                        return False
+                if nuke.selectedNode()['label'].getValue().startswith('IN_'):
+
+                    self.input_fetcher_prev_input = nuke.selectedNode()
+                    ident = nuke.selectedNode()['inputFetcherId'].getValue()
+                    for node in nuke.selectedNodes():
+                        node.setSelected(False)
+                    for node in nuke.allNodes('Dot'):
+                        if 'OUT_' in node['label'].getValue() and node['inputFetcherId'].getValue() == ident:
+                            node.setSelected(True)
+                            nuke.zoom(.3, [node['xpos'].getValue(), node['ypos'].getValue()])
+                else:
+                    for node in nuke.selectedNodes():
+                        node.setSelected(False)
+                    self.input_fetcher_prev_input.setSelected(True)
+                    nuke.zoom(.3, [self.input_fetcher_prev_input['xpos'].getValue(),
+                                   self.input_fetcher_prev_input['ypos'].getValue()])
+                    self.input_fetcher_prev_input = None
+        except:
+            pass

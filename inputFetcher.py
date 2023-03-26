@@ -251,19 +251,20 @@ class InputFetcher(QtWidgets.QDialog):
                     utils.InputFetcherUtils().connect_input(node, parent)
                     self.colorNodeByPrefix(node, self.getFetcherPrefix(node))
                     self.close()
-                    return True
                 elif self.is_valid_input(node) and utils.InputFetcherUtils().get_fetcher_id(node) == buttonId:
                     self.close()
-                    return True
                 elif node.Class() == self.node_class:
                     self.convert_default_node_to_input(node, buttonLabel, buttonId, parent)
                     self.close()
-                    return True
-
-        fetchNode = self.createFetchNode(self.convertLabelToInput(buttonLabel), buttonId)
-        utils.InputFetcherUtils().connect_input(fetchNode, parent)
-        self.close()
-        return True
+                elif node.Class() != self.node_class:
+                    self.warningLabel.setText(
+                        "COULDN'T CREATE INPUT NODES FOR SOME NODES!\nBECAUSE THEY AREN'T {} NODES!".format(
+                            self.node_class.upper()))
+        else:
+            fetchNode = self.createFetchNode(self.convertLabelToInput(buttonLabel), buttonId)
+            utils.InputFetcherUtils().connect_input(fetchNode, parent)
+            self.close()
+            return True
 
     def set_label(self, node, label_text):
         font_size = 100 if node.Class() == 'BackdropNode' else 45
@@ -632,3 +633,4 @@ class InputFetcher(QtWidgets.QDialog):
 
 inputFetcher = InputFetcher()
 nuke.menu('Nuke').addCommand('Edit/Input Fetcher', inputFetcher.goFetch, 'shift+n')
+nuke.menu('Nuke').addCommand('Edit/Input Fetcher Zoom To Output', utils.InputFetcherUtils().zoom_to_parent, 'a')
