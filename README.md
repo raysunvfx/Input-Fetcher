@@ -41,7 +41,7 @@ To create an OUTPUT, we need to use this syntax:<br>
 
 Here are the default prefixes that Input-Fetcher recognizes:
 
-PLATE<br>
+<font color='#F5F5DC'>PLATE<br>
 MATTE<br>
 RENDER<br>
 DEEP<br>
