@@ -5,6 +5,17 @@
 Input-Fetcher is a node organization system for the Foundry Nuke, which works on the idea of INPUTs and OUTPUTs.
 <br>
 
+##FAQ commands:
+Tag examples:
+'tag' - default tag command, will use tagged node's name as label.
+'tag new_label' - will use 'new_label' as tagged node's label.
+'untag' - untag node.
+
+Fetch examples:
+'OUT_PLATE_NATIVE' - create an output for category 'PLATE' named 'NATIVE'.
+'OUT_CAM_MAIN' - create an output for category 'CAM' named 'MAIN'.
+'OUT_MATTE_FG_CHAR_01' - creates an output for category 'MATTE' named 'FG_CHAR_01'
+'OUT_SHIP_FLAG_03' - creates an output for category 'SHIP' named 'FLAG_03'.
 
 ## How to use:
 
@@ -40,7 +51,6 @@ To create an OUTPUT, we need to use this syntax:<br>
 </p>
 
 Here are the default prefixes that Input-Fetcher recognizes:
-<span style="color:green">This text will be green</span>
 
 PLATE<br>
 MATTE<br>
@@ -60,3 +70,5 @@ We can also create INPUT nodes by copy and pasting OUTPUT nodes:
 
 Or by copy and pasting other INPUT nodes:
 ![ Alt text](inputFetcher_07.gif)
+
+Or by converting one or more dot nodes:
