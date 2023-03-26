@@ -5,18 +5,18 @@
 Input-Fetcher is a node organization system for the Foundry Nuke, which works on the idea of INPUTs and OUTPUTs.
 <br>
 
-##FAQ commands:
-Tag examples:
-'tag' - default tag command, will use tagged node's name as label.
-'tag new_label' - will use 'new_label' as tagged node's label.
-'untag' - untag node.
-
-Fetch examples:
-'OUT_PLATE_NATIVE' - create an output for category 'PLATE' named 'NATIVE'.
-'OUT_CAM_MAIN' - create an output for category 'CAM' named 'MAIN'.
-'OUT_MATTE_FG_CHAR_01' - creates an output for category 'MATTE' named 'FG_CHAR_01'
-'OUT_SHIP_FLAG_03' - creates an output for category 'SHIP' named 'FLAG_03'.
-
+##FAQ commands:</b>
+Tag examples:</b>
+'tag' - default tag command, will use tagged node's name as label.</b>
+'tag new_label' - will use 'new_label' as tagged node's label.</b>
+'untag' - untag node.</b>
+</b>
+Fetch examples:</b>
+'OUT_PLATE_NATIVE' - create an output for category 'PLATE' named 'NATIVE'.</b>
+'OUT_CAM_MAIN' - create an output for category 'CAM' named 'MAIN'.</b>
+'OUT_MATTE_FG_CHAR_01' - creates an output for category 'MATTE' named 'FG_CHAR_01'</b>
+'OUT_SHIP_FLAG_03' - creates an output for category 'SHIP' named 'FLAG_03'.</b>
+</b></b>
 ## How to use:
 
 To call Input-Fetcher, use the hotkey "SHIFT + N" in Nuke:
