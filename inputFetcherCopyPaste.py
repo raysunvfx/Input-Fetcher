@@ -4,8 +4,6 @@ import config
 import utils
 
 
-input_fetcher_class = 'Dot'
-
 def validateFetchInput(node):
     inputPrefix = 'IN_'
     label = node['label'].getValue()[:3]
@@ -21,7 +19,7 @@ def validateFetchOutput(node):
         return False
 
 def findFetcherOutputFrom(id, selfName):
-    for node in nuke.allNodes(input_fetcher_class):
+    for node in nuke.allNodes(config._NODE_CLASS):
         if validateFetchOutput(node) and node.name() != selfName:
             tmpId = utils.InputFetcherUtils().get_fetcher_id(node)
             if tmpId == id:
@@ -32,7 +30,7 @@ def convertToInput(node):
     node['label'].setValue(label)
 
 def outputExists(inputNode):
-    for node in nuke.allNodes(input_fetcher_class):
+    for node in nuke.allNodes(config._NODE_CLASS):
         try:
             if inputNode['inputFetcherId'].getValue() == node['inputFetcherId'].getValue() and validateFetchOutput(node) and validateFetchInput(inputNode) or validateFetchOutput(inputNode):
                 return True
@@ -41,7 +39,7 @@ def outputExists(inputNode):
     return False
 
 def hasDuplicateOutput(output):
-    for node in nuke.allNodes(input_fetcher_class):
+    for node in nuke.allNodes(config._NODE_CLASS):
         try:
             if output['inputFetcherId'].getValue() == node['inputFetcherId'].getValue() and validateFetchOutput(node) and node != output:
                 return True
@@ -50,7 +48,7 @@ def hasDuplicateOutput(output):
     return False
 
 def createOutputFromInput(input_node):
-    node_class_obj = getattr(nuke.nodes, input_fetcher_class)
+    node_class_obj = getattr(nuke.nodes, config._NODE_CLASS)
     output = node_class_obj(label = input_node['label'].getValue().replace('IN_', 'OUT_'), note_font_size = 45, note_font = 'Bold')
     knob = nuke.String_Knob('inputFetcherId')
     output.addKnob(knob)
@@ -75,7 +73,7 @@ def rsCopy():
     if not nuke.selectedNodes():
         return False
     nuke.nodeCopy('%clipboard%')
-    for node in nuke.selectedNodes(input_fetcher_class):
+    for node in nuke.selectedNodes(config._NODE_CLASS):
         if validateFetchInput(node):
             id = utils.InputFetcherUtils().get_fetcher_id(node)
             targetNode = findFetcherOutputFrom(id, node.name())
@@ -101,7 +99,7 @@ def untag_fetcher(node):
 
 def rsPaste():
     nuke.nodePaste('%clipboard%')
-    for node in nuke.selectedNodes(input_fetcher_class):
+    for node in nuke.selectedNodes(config._NODE_CLASS):
         if hasDuplicateOutput(node):
             convertToInput(node)
         if validateFetchInput(node) and not outputExists(node):

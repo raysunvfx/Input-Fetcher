@@ -15,7 +15,7 @@ Tag examples:</br>
 Fetch examples:</br>
 'OUT_PLATE_NATIVE' - create an output for category 'PLATE' named 'NATIVE'.</br>
 'OUT_CAM_MAIN' - create an output for category 'CAM' named 'MAIN'.</br>
-'OUT_MATTE_FG_CHAR_01' - creates an output for category 'MATTE' named 'FG_CHAR_01'</br>
+'OUT_MATTE_FG_CHAR_01' - creates an output for category 'MATTE' named 'FG_CHAR_01'.</br>
 'OUT_SHIP_FLAG_03' - creates an output for category 'SHIP' named 'FLAG_03'.</br>
 </br>
 </br>

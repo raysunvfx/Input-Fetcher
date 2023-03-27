@@ -186,18 +186,21 @@ class InputFetcher(QtWidgets.QDialog):
 
             labelLayoutRef.addWidget(label)
             # dynamically create QHBoxLayout for each button as class attribs
-            buttonsLayout = setattr(self, '{}ButtonsLayout'.format(p.lower()), QtWidgets.QHBoxLayout())
+            buttonsLayout = setattr(self, '{}ButtonsLayout'.format(p.lower()), QtWidgets.QGridLayout())
             # reference newly created QHBoxLayout obj
             buttonsLayoutRef = getattr(self, '{}ButtonsLayout'.format(p.lower()))
+            buttonsLayoutRef.setColumnStretch(config._BUTTONS_PER_ROW, 1)
 
-            for l in x:
+            x.reverse()
+            for i, l in enumerate(x):
+                row = i//config._BUTTONS_PER_ROW
+                column = i % config._BUTTONS_PER_ROW
                 button = QtWidgets.QPushButton(l['label'])
                 button.setObjectName(l[self.id_knob])
                 button.setStyleSheet("color : {}".format(color))
                 button.setFont(buttonFont)
                 button.clicked.connect(self.eventButtonClicked)
-                buttonsLayoutRef.addWidget(button)
-            buttonsLayoutRef.addStretch()
+                buttonsLayoutRef.addWidget(button, row, column)
             self.mainLayout.addLayout(labelLayoutRef)
             self.mainLayout.addWidget(labelDivider)
             self.mainLayout.addLayout(buttonsLayoutRef)
@@ -501,10 +504,14 @@ class InputFetcher(QtWidgets.QDialog):
             label = QtWidgets.QLabel('TAGGED')
             label.setFont(labelFont)
 
-            buttonsLayout = setattr(self, '{}ButtonsLayout'.format('tagged'), QtWidgets.QHBoxLayout())
+            buttonsLayout = setattr(self, '{}ButtonsLayout'.format('tagged'), QtWidgets.QGridLayout())
             buttonsLayoutRef = getattr(self, '{}ButtonsLayout'.format('tagged'))
+            buttonsLayoutRef.setColumnStretch(config._BUTTONS_PER_ROW, 1)
 
-            for node in self.taggedNodes:
+            self.taggedNodes.reverse()
+            for i, node in enumerate(self.taggedNodes):
+                row = i// config._BUTTONS_PER_ROW
+                column = i % config._BUTTONS_PER_ROW
                 for knob in node.knobs():
                     if 'inputFetcherSuffix' == knob:
                         name = node['inputFetcherSuffix'].getValue()
@@ -526,8 +533,7 @@ class InputFetcher(QtWidgets.QDialog):
                 button.setStyleSheet("background-color : {}; color : {}".format(node_default_hex_code, text_color))
                 button.setFont(buttonFont)
                 button.clicked.connect(self.taggedButton)
-                buttonsLayoutRef.addWidget(button)
-            buttonsLayoutRef.addStretch()
+                buttonsLayoutRef.addWidget(button, row, column)
 
             labelDivider = QtWidgets.QFrame()
             labelDivider.setFrameShape(QtWidgets.QFrame.HLine)
