@@ -18,7 +18,8 @@ Along with a mock script for testing things out!<br>
 2. Copy contents of init.py into your init.py.<br>
 3. Copy contents of menu.py into your menu.py.<br>
 4. Move the inputFetcher_v1.0 folder and its contents into your .nuke folder.<br>
-
+5. OPTIONAL: Change the "_NODE_CLASS" value from 'Dot' to 'NoOp' if that's what you prefer!<br>
+6. Launch Nuke and "Shift + N"!
 
 ## Quick Start Reference:</br>
 Tag examples:</br>
