@@ -7,14 +7,10 @@ Input-Fetcher is a node organization system for the Foundry Nuke, which works on
 ## Installation:
 Add these two lines into your menu.py file:<br>
 
-from inputFetcher import *<br>
-from inputFetcherCopyPaste import *<br>
-
-Copy these files into your .nuke folder:<br>
-inputFetcher.py<br>
-inputFetcherConfig.py<br>
-inputFetcherCopyPaste.py<br>
-inputFetcherUtils.py
+1. Go to your .nuke folder.<br>
+2. Copy contents of init.py into your init.py.<br>
+3. Copy contents of menu.py into your menu.py.<br>
+4. Move the inputFetcher_v1.0 folder and its contents into your .nuke folder.<br>
 
 
 ## Quick Start Guide:</br>
