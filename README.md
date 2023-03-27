@@ -86,3 +86,6 @@ Or by converting one or more dot nodes:
 
 Renaming an OUTPUT will update its children:
 ![ Alt text](media/inputFetcher_09.gif)
+
+Use the hotkey "CTRL + C" to connect disconnected inputs:
+![ Alt text](media/inputFetcher_10.gif)
