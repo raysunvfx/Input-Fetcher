@@ -335,7 +335,6 @@ BackdropNode {
 }
 push $cut_paste_input
 Viewer {
- frame 1
  frame_range 1-100
  name Viewer1
  selected true
@@ -758,6 +757,8 @@ Dot {
 Read {
  inputs 0
  origset true
+ in_colorspace scene_linear
+ out_colorspace scene_linear
  name Read2
  selected true
  xpos 29
@@ -779,7 +780,7 @@ Dot {
  addUserKnob {1 inputFetcherId +DISABLED}
  inputFetcherId 8863bf114c5d438c
 }
-set Nf7b60c00 [stack 0]
+set Ndccce800 [stack 0]
 Dot {
  name Dot65
  autolabel "nuke.thisNode()\['label'].getValue()"
@@ -828,7 +829,7 @@ Dot {
  addUserKnob {1 inputFetcherId +DISABLED}
  inputFetcherId ef23dc5c4e704b1f
 }
-set Nf7b7b800 [stack 0]
+set Na9ae7400 [stack 0]
 Dot {
  name Dot66
  autolabel "nuke.thisNode()\['label'].getValue()"
@@ -932,7 +933,7 @@ Dot {
  addUserKnob {1 inputFetcherId +DISABLED}
  inputFetcherId 1960750fd2c74f1b
 }
-set Nf7bf1c00 [stack 0]
+set Na997f800 [stack 0]
 Dot {
  name Dot51
  autolabel "nuke.thisNode()\['label'].getValue()"
@@ -1135,7 +1136,7 @@ Dot {
  xpos 6411
  ypos 12600
 }
-push $Nf7bf1c00
+push $Na997f800
 Dot {
  name Dot39
  autolabel "nuke.thisNode()\['label'].getValue()"
@@ -1290,6 +1291,8 @@ Dot {
 Read {
  inputs 0
  origset true
+ in_colorspace scene_linear
+ out_colorspace scene_linear
  name Read7
  selected true
  xpos 4294
@@ -1311,7 +1314,7 @@ Dot {
  addUserKnob {1 inputFetcherId +DISABLED}
  inputFetcherId 7138c00984314c34
 }
-set Nf8dfb400 [stack 0]
+set Na9853000 [stack 0]
 Dot {
  name Dot43
  autolabel "nuke.thisNode()\['label'].getValue()"
@@ -1337,6 +1340,8 @@ Dot {
 Read {
  inputs 0
  origset true
+ in_colorspace scene_linear
+ out_colorspace scene_linear
  name Read9
  selected true
  xpos 6004
@@ -1358,7 +1363,7 @@ Dot {
  addUserKnob {1 inputFetcherId +DISABLED}
  inputFetcherId 8549e65ef96d441f
 }
-set Nf8dfa000 [stack 0]
+set Na962fc00 [stack 0]
 Dot {
  name Dot35
  autolabel "nuke.thisNode()\['label'].getValue()"
@@ -1469,6 +1474,8 @@ Transform {
 Read {
  inputs 0
  origset true
+ in_colorspace scene_linear
+ out_colorspace scene_linear
  name Read15
  selected true
  xpos 6082
@@ -1695,7 +1702,7 @@ Dot {
  xpos 10348
  ypos 12499
 }
-push $Nf8dfa000
+push $Na962fc00
 Dot {
  name Dot48
  autolabel "nuke.thisNode()\['label'].getValue()"
@@ -1715,6 +1722,8 @@ Dot {
 Read {
  inputs 0
  origset true
+ in_colorspace scene_linear
+ out_colorspace scene_linear
  name Read4
  selected true
  xpos 1945
@@ -1756,6 +1765,8 @@ push 0
 Read {
  inputs 0
  origset true
+ in_colorspace scene_linear
+ out_colorspace scene_linear
  name Read5
  selected true
  xpos 2712
@@ -1793,7 +1804,7 @@ Dot {
  addUserKnob {1 inputFetcherId +DISABLED}
  inputFetcherId 5b16ee3e755a4080
 }
-push $Nf8dfb400
+push $Na9853000
 Dot {
  name Dot45
  autolabel "nuke.thisNode()\['label'].getValue()"
@@ -1817,7 +1828,7 @@ Merge2 {
  xpos 8024
  ypos 7989
 }
-push $Nf7b7b800
+push $Na9ae7400
 Dot {
  name Dot50
  autolabel "nuke.thisNode()\['label'].getValue()"
@@ -1888,7 +1899,7 @@ Dot {
  xpos 8524
  ypos 6991
 }
-push $Nf7b60c00
+push $Ndccce800
 Dot {
  name Dot31
  autolabel "nuke.thisNode()\['label'].getValue()"
@@ -2033,6 +2044,8 @@ Group {
  }
 end_group
 Write {
+ in_colorspace scene_linear
+ out_colorspace scene_linear
  name Write1
  selected true
  xpos 7667
@@ -2197,34 +2210,8 @@ StickyNote {
  xpos 7882
  ypos -3910
 }
-Read {
+Dot {
  inputs 0
- origset true
- in_colorspace scene_linear
- out_colorspace scene_linear
- name Read10
- selected true
- xpos 6862
- ypos -386
- postage_stamp false
-}
-Dot {
- name Dot10
- autolabel "nuke.thisNode()\['label'].getValue()"
- tile_color 0x3cb371ff
- label OUT_MATTE_SR_TREE
- note_font " Bold"
- note_font_size 45
- note_font_color 0x3cb371ff
- selected true
- xpos 6896
- ypos 224
- addUserKnob {20 User}
- addUserKnob {1 inputFetcherId +DISABLED}
- inputFetcherId f9a70a7a73074246
-}
-set Nf8fc5800 [stack 0]
-Dot {
  name Dot11
  autolabel "nuke.thisNode()\['label'].getValue()"
  tile_color 0x3cb371ff
@@ -2267,6 +2254,7 @@ Dot {
  inputFetcherId a25b0b621d5e47df
 }
 Dot {
+ inputs 0
  name Dot38
  autolabel "nuke.thisNode()\['label'].getValue()"
  tile_color 0x66ff66ff
@@ -2303,7 +2291,30 @@ Dot {
  xpos 9728
  ypos -3817
 }
-push $Nf8fc5800
+Read {
+ inputs 0
+ origset true
+ name Read10
+ selected true
+ xpos 6862
+ ypos -386
+ postage_stamp false
+}
+Dot {
+ name Dot10
+ autolabel "nuke.thisNode()\['label'].getValue()"
+ tile_color 0x3cb371ff
+ label OUT_MATTE_SR_TREE
+ note_font " Bold"
+ note_font_size 45
+ note_font_color 0x3cb371ff
+ selected true
+ xpos 6896
+ ypos 224
+ addUserKnob {20 User}
+ addUserKnob {1 inputFetcherId +DISABLED}
+ inputFetcherId f9a70a7a73074246
+}
 Viewer {
  frame_range 1-100
  name Viewer2
@@ -2452,7 +2463,7 @@ StickyNote {
  xpos 7877
  ypos -4551
 }
-push $Nf7bf1c00
+push $Na997f800
 Dot {
  name Dot76
  autolabel "nuke.thisNode()\['label'].getValue()"
@@ -2469,7 +2480,7 @@ Dot {
  addUserKnob {1 inputFetcherId +DISABLED}
  inputFetcherId 1960750fd2c74f1b
 }
-push $Nf8dfa000
+push $Na962fc00
 Dot {
  name Dot75
  autolabel "nuke.thisNode()\['label'].getValue()"
@@ -2559,7 +2570,7 @@ Dot {
  addUserKnob {1 inputFetcherId +DISABLED}
  inputFetcherId 0d5023a0ff764b17
 }
-set Nfbd4d800 [stack 0]
+set Naae2b800 [stack 0]
 Dot {
  name Dot79
  autolabel "nuke.thisNode()\['label'].getValue()"
@@ -2574,7 +2585,7 @@ Dot {
  addUserKnob {1 inputFetcherId +DISABLED}
  inputFetcherId 0d5023a0ff764b17
 }
-push $Nfbd4d800
+push $Naae2b800
 Dot {
  name Dot78
  autolabel "nuke.thisNode()\['label'].getValue()"
