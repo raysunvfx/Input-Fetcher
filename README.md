@@ -3,7 +3,7 @@
 ## What it does:
 
 Input-Fetcher is a node organization system for the Foundry Nuke, which works on the idea of INPUTs and OUTPUTs.
-<br>
+<br><br>
 It's a great solution for compositors who are looking to speed up their workflow and improve their script organization and mental clarity.
 ## Installation:
 
@@ -13,7 +13,7 @@ It's a great solution for compositors who are looking to speed up their workflow
 4. Move the inputFetcher_v1.0 folder and its contents into your .nuke folder.<br>
 
 
-## Quick Start Guide:</br>
+## Quick Start Reference:</br>
 Tag examples:</br>
 'tag' - default tag command, will use tagged node's name as label.</br>
 'tag new_label' - will use 'new_label' as tagged node's label.</br>
@@ -43,13 +43,13 @@ There are three contexts:
 
 
 
-Currently, we don't have any nodes selected, so it will by default create a "Dot" node and set the input text as its label:
+Currently, we don't have any nodes selected, so it will by default create a "Dot" node and set the input text as its label:<br>
 ![ Alt text](media/inputFetcher_01.gif)
 
-If we call Input-Fetcher with a node selected however, any input we enter will be applied to the node as its label:
+If we call Input-Fetcher with a node selected however, any input we enter will be applied to the node as its label:<br>
 ![ Alt text](media/inputFetcher_02.gif)
 
-If multiple nodes are selected, all will receive the same label:
+If multiple nodes are selected, all will receive the same label:<br>
 ![ Alt text](media/inputFetcher_03.gif)
 
 <HR></HR>
