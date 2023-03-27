@@ -52,8 +52,8 @@ If we call Input-Fetcher with a node selected however, any input we enter will b
 If multiple nodes are selected, all will receive the same label:<br>
 ![ Alt text](media/inputFetcher_03.gif)
 
-<HR></HR>
-## Input and Output Context:<br>
+
+## Input / Output Context:<br>
 Creating INPUTs and OUTPUTs is the main functionality of Input-Fetcher.<br>
 To create an OUTPUT, we need to use this syntax:<br>
 <p align="center">
