@@ -6,8 +6,11 @@ Input-Fetcher is a node organization system for the Foundry Nuke, which works on
 <br>
 ## Installation:
 Add these two lines into your menu.py file:<br>
+
 from inputFetcher import *<br>
 from inputFetcherCopyPaste import *<br>
+
+Copy 
 
 
 ## Quick Start Guide:</br>
@@ -27,7 +30,7 @@ Fetch examples:</br>
 ## How to use:
 
 To call Input-Fetcher, use the hotkey "SHIFT + N" in Nuke:
-![ Alt text](inputFetcher_00.gif)
+![ Alt text](media/inputFetcher_00.gif)
 
 
 Input-Fetcher has different functionality based on context.
@@ -41,13 +44,13 @@ There are three contexts:
 
 
 Currently, we don't have any nodes selected, so it will by default create a "Dot" node and set the input text as its label:
-![ Alt text](inputFetcher_01.gif)
+![ Alt text](media/inputFetcher_01.gif)
 
 If we call Input-Fetcher with a node selected however, any input we enter will be applied to the node as its label:
-![ Alt text](inputFetcher_02.gif)
+![ Alt text](media/inputFetcher_02.gif)
 
 If multiple nodes are selected, all will receive the same label:
-![ Alt text](inputFetcher_03.gif)
+![ Alt text](media/inputFetcher_03.gif)
 
 <HR></HR>
 ### Input/Output Context:
@@ -67,15 +70,15 @@ CAM<br>
 GEO<br>
 
 To create an OUTPUT for a plate, we can enter <b>"OUT_PLATE_NATIVE"</b>:
-![ Alt text](inputFetcher_04.gif)
+![ Alt text](media/inputFetcher_04.gif)
 
 Calling Input-Fetcher again, the newly created OUTPUT node will be visible in the UI, clicking it will create an INPUT node:
-![ Alt text](inputFetcher_05.gif)
+![ Alt text](media/inputFetcher_05.gif)
 
 We can also create INPUT nodes by copy and pasting OUTPUT nodes:
-![ Alt text](inputFetcher_06.gif)
+![ Alt text](media/inputFetcher_06.gif)
 
 Or by copy and pasting other INPUT nodes:
-![ Alt text](inputFetcher_07.gif)
+![ Alt text](media/inputFetcher_07.gif)
 
 Or by converting one or more dot nodes:

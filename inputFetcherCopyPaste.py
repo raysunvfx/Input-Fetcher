@@ -1,7 +1,7 @@
 import nuke
 import nukescripts
-import config
-import utils
+import inputFetcherConfig
+import inputFetcherUtils
 
 
 def validateFetchInput(node):
@@ -19,9 +19,9 @@ def validateFetchOutput(node):
         return False
 
 def findFetcherOutputFrom(id, selfName):
-    for node in nuke.allNodes(config._NODE_CLASS):
+    for node in nuke.allNodes(inputFetcherConfig._NODE_CLASS):
         if validateFetchOutput(node) and node.name() != selfName:
-            tmpId = utils.InputFetcherUtils().get_fetcher_id(node)
+            tmpId = inputFetcherUtils.InputFetcherUtils().get_fetcher_id(node)
             if tmpId == id:
                 return node
 
@@ -30,7 +30,7 @@ def convertToInput(node):
     node['label'].setValue(label)
 
 def outputExists(inputNode):
-    for node in nuke.allNodes(config._NODE_CLASS):
+    for node in nuke.allNodes(inputFetcherConfig._NODE_CLASS):
         try:
             if inputNode['inputFetcherId'].getValue() == node['inputFetcherId'].getValue() and validateFetchOutput(node) and validateFetchInput(inputNode) or validateFetchOutput(inputNode):
                 return True
@@ -39,7 +39,7 @@ def outputExists(inputNode):
     return False
 
 def hasDuplicateOutput(output):
-    for node in nuke.allNodes(config._NODE_CLASS):
+    for node in nuke.allNodes(inputFetcherConfig._NODE_CLASS):
         try:
             if output['inputFetcherId'].getValue() == node['inputFetcherId'].getValue() and validateFetchOutput(node) and node != output:
                 return True
@@ -48,7 +48,7 @@ def hasDuplicateOutput(output):
     return False
 
 def createOutputFromInput(input_node):
-    node_class_obj = getattr(nuke.nodes, config._NODE_CLASS)
+    node_class_obj = getattr(nuke.nodes, inputFetcherConfig._NODE_CLASS)
     output = node_class_obj(label = input_node['label'].getValue().replace('IN_', 'OUT_'), note_font_size = 45, note_font = 'Bold')
     knob = nuke.String_Knob('inputFetcherId')
     output.addKnob(knob)
@@ -56,7 +56,7 @@ def createOutputFromInput(input_node):
     output['inputFetcherId'].setEnabled(False)
     output['tile_color'].setValue(int(input_node['tile_color'].getValue()))
     output['note_font_color'].setValue(int(input_node['tile_color'].getValue()))
-    utils.InputFetcherUtils().label_as_name(output)
+    inputFetcherUtils.InputFetcherUtils().label_as_name(output)
     for knob in output.knobs():
         if knob != 'inputFetcherId':
             output[knob].setVisible(False)
@@ -73,11 +73,11 @@ def rsCopy():
     if not nuke.selectedNodes():
         return False
     nuke.nodeCopy('%clipboard%')
-    for node in nuke.selectedNodes(config._NODE_CLASS):
+    for node in nuke.selectedNodes(inputFetcherConfig._NODE_CLASS):
         if validateFetchInput(node):
-            id = utils.InputFetcherUtils().get_fetcher_id(node)
+            id = inputFetcherUtils.InputFetcherUtils().get_fetcher_id(node)
             targetNode = findFetcherOutputFrom(id, node.name())
-            utils.InputFetcherUtils().connect_input(node, targetNode)
+            inputFetcherUtils.InputFetcherUtils().connect_input(node, targetNode)
 
 def hideFetcherKnobs(node):
     for knob in node.knobs():
@@ -99,15 +99,15 @@ def untag_fetcher(node):
 
 def rsPaste():
     nuke.nodePaste('%clipboard%')
-    for node in nuke.selectedNodes(config._NODE_CLASS):
+    for node in nuke.selectedNodes(inputFetcherConfig._NODE_CLASS):
         if hasDuplicateOutput(node):
             convertToInput(node)
         if validateFetchInput(node) and not outputExists(node):
             createOutputFromInput(node)
         if validateFetchInput(node):
-            id = utils.InputFetcherUtils().get_fetcher_id(node)
+            id = inputFetcherUtils.InputFetcherUtils().get_fetcher_id(node)
             targetNode = findFetcherOutputFrom(id, node.name())
-            utils.InputFetcherUtils().connect_input(node, targetNode)
+            inputFetcherUtils.InputFetcherUtils().connect_input(node, targetNode)
         hideFetcherKnobs(node)
     for node in nuke.selectedNodes():
         if fetcher_is_tagged(node):

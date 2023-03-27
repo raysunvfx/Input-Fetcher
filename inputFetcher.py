@@ -1,8 +1,8 @@
 from PySide2 import QtWidgets, QtCore, QtGui
 import uuid
 import nuke
-import config
-import utils
+import inputFetcherConfig
+import inputFetcherUtils
 
 
 class InputFetcher(QtWidgets.QDialog):
@@ -10,23 +10,23 @@ class InputFetcher(QtWidgets.QDialog):
         QtWidgets.QDialog.__init__(self)
 
         # Config input/output node class
-        self.node_class = config._NODE_CLASS
+        self.node_class = inputFetcherConfig._NODE_CLASS
 
         # Config window defaults
-        self.setWindowTitle(config._TITLE)
+        self.setWindowTitle(inputFetcherConfig._TITLE)
 
         # Config font defaults;
-        self.button_font = config._BUTTON_FONT
+        self.button_font = inputFetcherConfig._BUTTON_FONT
 
         # Config search variables
-        self.outputPrefix = config._OUTPUT_PREFIX
-        self.inputPrefix = config._INPUT_PREFIX
-        self.separator = config._SEPARATOR
-        self.tag_knob = config._TAG_KNOB
-        self.id_knob = config._ID_KNOB
+        self.outputPrefix = inputFetcherConfig._OUTPUT_PREFIX
+        self.inputPrefix = inputFetcherConfig._INPUT_PREFIX
+        self.separator = inputFetcherConfig._SEPARATOR
+        self.tag_knob = inputFetcherConfig._TAG_KNOB
+        self.id_knob = inputFetcherConfig._ID_KNOB
 
         # Config group prefixes and colors
-        self.prefix_color = config._PREFIX_COLOR
+        self.prefix_color = inputFetcherConfig._PREFIX_COLOR
 
         # Config label variables
         self.outputLabels = []
@@ -40,13 +40,13 @@ class InputFetcher(QtWidgets.QDialog):
         self.taggedNodes = []
 
         # Config commands
-        self.commands = config._COMMANDS
+        self.commands = inputFetcherConfig._COMMANDS
         # Config layout
         self.mainLayout = QtWidgets.QVBoxLayout()
 
     def initLayout(self):
         # Config labeller
-        placeHolderText = config._PLACE_HOLDER_TEXT
+        placeHolderText = inputFetcherConfig._PLACE_HOLDER_TEXT
         if len(nuke.selectedNodes()) == 1:
             n = nuke.selectedNode()
             placeHolderText = n['label'].getValue()
@@ -112,7 +112,7 @@ class InputFetcher(QtWidgets.QDialog):
             if self.is_valid_output(node):
                 self.outputLabels.append(self.getFetcherLabel(node))
                 self.outputNodes.append(node)
-                self.outputInfo.append(self.makeDict(node.name(), utils.InputFetcherUtils().get_fetcher_id(node),
+                self.outputInfo.append(self.makeDict(node.name(), inputFetcherUtils.InputFetcherUtils().get_fetcher_id(node),
                                                      self.getFetcherLabel(node)))
 
     def findUniquePrefixes(self):
@@ -189,12 +189,12 @@ class InputFetcher(QtWidgets.QDialog):
             buttonsLayout = setattr(self, '{}ButtonsLayout'.format(p.lower()), QtWidgets.QGridLayout())
             # reference newly created QHBoxLayout obj
             buttonsLayoutRef = getattr(self, '{}ButtonsLayout'.format(p.lower()))
-            buttonsLayoutRef.setColumnStretch(config._BUTTONS_PER_ROW, 1)
+            buttonsLayoutRef.setColumnStretch(inputFetcherConfig._BUTTONS_PER_ROW, 1)
 
             x.reverse()
             for i, l in enumerate(x):
-                row = i//config._BUTTONS_PER_ROW
-                column = i % config._BUTTONS_PER_ROW
+                row = i//inputFetcherConfig._BUTTONS_PER_ROW
+                column = i % inputFetcherConfig._BUTTONS_PER_ROW
                 button = QtWidgets.QPushButton(l['label'])
                 button.setObjectName(l[self.id_knob])
                 button.setStyleSheet("color : {}".format(color))
@@ -248,13 +248,13 @@ class InputFetcher(QtWidgets.QDialog):
 
         if nuke.selectedNodes():
             for node in nuke.selectedNodes():
-                if self.is_valid_input(node) and utils.InputFetcherUtils().get_fetcher_id(node) != buttonId:
+                if self.is_valid_input(node) and inputFetcherUtils.InputFetcherUtils().get_fetcher_id(node) != buttonId:
                     self.updateId(node, buttonId)
-                    utils.InputFetcherUtils().update_label(node, self.convertLabelToInput(buttonLabel))
-                    utils.InputFetcherUtils().connect_input(node, parent)
+                    inputFetcherUtils.InputFetcherUtils().update_label(node, self.convertLabelToInput(buttonLabel))
+                    inputFetcherUtils.InputFetcherUtils().connect_input(node, parent)
                     self.colorNodeByPrefix(node, self.getFetcherPrefix(node))
                     self.close()
-                elif self.is_valid_input(node) and utils.InputFetcherUtils().get_fetcher_id(node) == buttonId:
+                elif self.is_valid_input(node) and inputFetcherUtils.InputFetcherUtils().get_fetcher_id(node) == buttonId:
                     self.close()
                 elif node.Class() == self.node_class:
                     self.convert_default_node_to_input(node, buttonLabel, buttonId, parent)
@@ -265,7 +265,7 @@ class InputFetcher(QtWidgets.QDialog):
                             self.node_class.upper()))
         else:
             fetchNode = self.createFetchNode(self.convertLabelToInput(buttonLabel), buttonId)
-            utils.InputFetcherUtils().connect_input(fetchNode, parent)
+            inputFetcherUtils.InputFetcherUtils().connect_input(fetchNode, parent)
             self.close()
             return True
 
@@ -376,7 +376,7 @@ class InputFetcher(QtWidgets.QDialog):
             self.reset_labeller_state()
             return False
 
-        if self.multiple_default_node_selected(n) and utils.InputFetcherUtils().validate_output_label(input):
+        if self.multiple_default_node_selected(n) and inputFetcherUtils.InputFetcherUtils().validate_output_label(input):
             self.warningLabel.setText(
                 "CAN'T CREATE MORE THAN ONE OUTPUT AT THE SAME TIME!\nMULTIPLE {} NODES SELECTED!".format(
                     self.node_class.upper()))
@@ -390,13 +390,13 @@ class InputFetcher(QtWidgets.QDialog):
             return
 
         if len(n) == 1 and self.is_valid_output(
-                nuke.selectedNode()) and utils.InputFetcherUtils().validate_output_label(input):
-            self.updateOuputAndChildren(utils.InputFetcherUtils().get_fetcher_id(nuke.selectedNode()), input.upper())
+                nuke.selectedNode()) and inputFetcherUtils.InputFetcherUtils().validate_output_label(input):
+            self.updateOuputAndChildren(inputFetcherUtils.InputFetcherUtils().get_fetcher_id(nuke.selectedNode()), input.upper())
             self.close()
             return
 
         if len(n) == 1 and not self.is_valid_output(nuke.selectedNode()) and not self.is_valid_input(
-                nuke.selectedNode()) and utils.InputFetcherUtils().validate_output_label(input):
+                nuke.selectedNode()) and inputFetcherUtils.InputFetcherUtils().validate_output_label(input):
             if nuke.selectedNode().Class() == self.node_class:
                 self.createFetchNode(input, node=nuke.selectedNode())
                 self.close()
@@ -409,7 +409,7 @@ class InputFetcher(QtWidgets.QDialog):
         selected_node_classes = []
         for node in n:
             selected_node_classes.append(node.Class())
-            if self.node_class not in selected_node_classes and utils.InputFetcherUtils().validate_output_label(input):
+            if self.node_class not in selected_node_classes and inputFetcherUtils.InputFetcherUtils().validate_output_label(input):
                 self.warningLabel.setText(
                     "I DON'T KNOW WHICH NODE YOU WANT TO CREATE AN OUTPUT FOR.\nPLEASE HAVE ONLY ONE NODE SELECTED!")
                 self.reset_labeller_state()
@@ -506,12 +506,12 @@ class InputFetcher(QtWidgets.QDialog):
 
             buttonsLayout = setattr(self, '{}ButtonsLayout'.format('tagged'), QtWidgets.QGridLayout())
             buttonsLayoutRef = getattr(self, '{}ButtonsLayout'.format('tagged'))
-            buttonsLayoutRef.setColumnStretch(config._BUTTONS_PER_ROW, 1)
+            buttonsLayoutRef.setColumnStretch(inputFetcherConfig._BUTTONS_PER_ROW, 1)
 
             self.taggedNodes.reverse()
             for i, node in enumerate(self.taggedNodes):
-                row = i// config._BUTTONS_PER_ROW
-                column = i % config._BUTTONS_PER_ROW
+                row = i// inputFetcherConfig._BUTTONS_PER_ROW
+                column = i % inputFetcherConfig._BUTTONS_PER_ROW
                 for knob in node.knobs():
                     if 'inputFetcherSuffix' == knob:
                         name = node['inputFetcherSuffix'].getValue()
@@ -545,10 +545,10 @@ class InputFetcher(QtWidgets.QDialog):
 
     def taggedButton(self):
         senderName = self.sender().objectName()
-        utils.InputFetcherUtils().clear_selection()
+        inputFetcherUtils.InputFetcherUtils().clear_selection()
         node = nuke.toNode(senderName)
         if node.Class() != 'BackdropNode':
-            utils.InputFetcherUtils().duplicate_expression_linked(node)
+            inputFetcherUtils.InputFetcherUtils().duplicate_expression_linked(node)
             self.untag(nuke.selectedNode())
         else:
             node.selectNodes()
@@ -565,7 +565,7 @@ class InputFetcher(QtWidgets.QDialog):
 
 
     def resetLayout(self, layout):
-        self.resize(config._WINDOW_SIZE_WIDTH, config._WINDOW_SIZE_HEIGHT)
+        self.resize(inputFetcherConfig._WINDOW_SIZE_WIDTH, inputFetcherConfig._WINDOW_SIZE_HEIGHT)
         self.outputLabels = []
         self.cleanedLabels = []
         self.uniquePrefixList = []
@@ -587,10 +587,10 @@ class InputFetcher(QtWidgets.QDialog):
 
     def convert_default_node_to_input(self, node, label, ident, parent):
         self.set_label(node, self.convertLabelToInput(label))
-        utils.InputFetcherUtils().label_as_name(node)
+        inputFetcherUtils.InputFetcherUtils().label_as_name(node)
         self.assign_id(node, ident)
         self.colorNodeByPrefix(node, self.get_prefix_from_label(label))
-        utils.InputFetcherUtils().connect_input(node, parent)
+        inputFetcherUtils.InputFetcherUtils().connect_input(node, parent)
 
     def hide_fetcher_knobs(self, node):
         for knob in node.knobs():
@@ -605,15 +605,15 @@ class InputFetcher(QtWidgets.QDialog):
             fetchNode = node
 
         self.set_label(fetchNode, label)
-        utils.InputFetcherUtils().label_as_name(fetchNode)
+        inputFetcherUtils.InputFetcherUtils().label_as_name(fetchNode)
         self.hide_fetcher_knobs(fetchNode)
         try:
-            if utils.InputFetcherUtils().validate_output_label(label) or utils.InputFetcherUtils().validate_input_label(label):
+            if inputFetcherUtils.InputFetcherUtils().validate_output_label(label) or inputFetcherUtils.InputFetcherUtils().validate_input_label(label):
                 prefix = label.split(self.separator)[1].upper()
                 self.colorNodeByPrefix(fetchNode, prefix)
         except IndexError:
             return False
-        if utils.InputFetcherUtils().validate_output_label(label) or utils.InputFetcherUtils().validate_input_label(label):
+        if inputFetcherUtils.InputFetcherUtils().validate_output_label(label) or inputFetcherUtils.InputFetcherUtils().validate_input_label(label):
             try:
                 if fetchNode[self.id_knob]:
                     pass
@@ -639,4 +639,4 @@ class InputFetcher(QtWidgets.QDialog):
 
 inputFetcher = InputFetcher()
 nuke.menu('Nuke').addCommand('Edit/Input Fetcher', inputFetcher.goFetch, 'shift+n')
-nuke.menu('Nuke').addCommand('Edit/Input Fetcher Zoom To Output', utils.InputFetcherUtils().zoom_to_parent, 'a')
+nuke.menu('Nuke').addCommand('Edit/Input Fetcher Zoom To Output', inputFetcherUtils.InputFetcherUtils().zoom_to_parent, 'a')
