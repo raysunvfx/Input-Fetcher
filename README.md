@@ -13,7 +13,7 @@ Along with a mock script for testing things out!<br>
 ![ Alt text](media/inputFetcher_demo.gif)
 <br>
 ## Installation:<br>
-Downloading the inputFetcher_Zip.7z file.<br>
+Downloading the inputFetcher_Zip.7z file and extract its contents.<br>
 
 1. Go to your .nuke folder.<br>
 2. Copy contents of init.py into your init.py.<br>
