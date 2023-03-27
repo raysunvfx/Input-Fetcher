@@ -5,9 +5,9 @@
 Input-Fetcher is a node organization system for the Foundry Nuke, which works on the idea of INPUTs and OUTPUTs.
 <br>
 ## Installation:
-Add these two lines into your menu.py file:
-from inputFetcher import *
-from inputFetcherCopyPaste import *
+Add these two lines into your menu.py file:<br>
+from inputFetcher import *<br>
+from inputFetcherCopyPaste import *<br>
 
 
 ## Quick Start Guide:</br>
