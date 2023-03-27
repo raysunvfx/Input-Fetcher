@@ -10,7 +10,11 @@ Add these two lines into your menu.py file:<br>
 from inputFetcher import *<br>
 from inputFetcherCopyPaste import *<br>
 
-Copy 
+Copy these files into your .nuke folder:<br>
+inputFetcher.py<br>
+inputFetcherConfig.py<br>
+inputFetcherCopyPaste.py<br>
+inputFetcherUtils.py
 
 
 ## Quick Start Guide:</br>

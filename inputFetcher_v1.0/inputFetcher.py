@@ -117,15 +117,13 @@ class InputFetcher(QtWidgets.QDialog):
 
     def findUniquePrefixes(self):
         # EXAMPLE: MATTE_CHARACTER --> MATTE
-        print('running findUniquePrefixes')
         try:
             for item in self.outputInfo:
-                print(item)
                 prefix = item['label'].replace(self.outputPrefix + self.separator, "").split(self.separator)[0]
                 if prefix not in self.uniquePrefixList:
                     self.uniquePrefixList.append(prefix)
         except:
-            print('something gone wrong')
+            pass
 
     def sortUniquePrefixes(self):
         # get all unique prefixes
@@ -193,7 +191,7 @@ class InputFetcher(QtWidgets.QDialog):
 
             x.reverse()
             for i, l in enumerate(x):
-                row = i//inputFetcherConfig._BUTTONS_PER_ROW
+                row = i // inputFetcherConfig._BUTTONS_PER_ROW
                 column = i % inputFetcherConfig._BUTTONS_PER_ROW
                 button = QtWidgets.QPushButton(l['label'])
                 button.setObjectName(l[self.id_knob])
@@ -510,7 +508,7 @@ class InputFetcher(QtWidgets.QDialog):
 
             self.taggedNodes.reverse()
             for i, node in enumerate(self.taggedNodes):
-                row = i// inputFetcherConfig._BUTTONS_PER_ROW
+                row = i // inputFetcherConfig._BUTTONS_PER_ROW
                 column = i % inputFetcherConfig._BUTTONS_PER_ROW
                 for knob in node.knobs():
                     if 'inputFetcherSuffix' == knob:

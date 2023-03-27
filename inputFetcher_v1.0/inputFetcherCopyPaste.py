@@ -1,5 +1,4 @@
 import nuke
-import nukescripts
 import inputFetcherConfig
 import inputFetcherUtils
 
