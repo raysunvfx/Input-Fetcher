@@ -38,7 +38,7 @@ There are three contexts:
 1. Labeller
 2. Input/Output
 3. Commands
-<HR></HR>
+
 ## Labeller Context
 
 
@@ -82,3 +82,7 @@ Or by copy and pasting other INPUT nodes:
 ![ Alt text](media/inputFetcher_07.gif)
 
 Or by converting one or more dot nodes:
+![ Alt text](media/inputFetcher_08.gif)
+
+Renaming an OUTPUT will update its children:
+![ Alt text](media/inputFetcher_09.gif)
