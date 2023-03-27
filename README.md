@@ -53,7 +53,7 @@ If multiple nodes are selected, all will receive the same label:<br>
 ![ Alt text](media/inputFetcher_03.gif)
 
 <HR></HR>
-## Input/Output Context:
+## Input/Output Context:<br>
 Creating INPUTs and OUTPUTs is the main functionality of Input-Fetcher.<br>
 To create an OUTPUT, we need to use this syntax:<br>
 <p align="center">
