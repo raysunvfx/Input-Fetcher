@@ -7,7 +7,7 @@ Input-Fetcher is a node organization system for the Foundry Nuke, which works on
 It's a great solution for compositors who are looking to speed up their workflow and improve their script organization and mental clarity.
 
 ## Try the demo without installing:
-Copy the contents of the demo.py and paste it into a new Nuke session's node graph.<br>
+Copy and paste the contents of the demo.py and paste it into a new Nuke session's node graph.<br>
 A brief introduction of Input Fetcher's features is laid out at the top of the script.<br>
 Along with a mock script for testing things out!<br>
 ![ Alt text](media/inputFetcher_demo.gif)
