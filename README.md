@@ -4,8 +4,13 @@
 
 Input-Fetcher is a node organization system for the Foundry Nuke, which works on the idea of INPUTs and OUTPUTs.
 <br>
+## Installation:
+Add these two lines into your menu.py file:
+from inputFetcher import *
+from inputFetcherCopyPaste import *
 
-## Quick commands guide:</br>
+
+## Quick Start Guide:</br>
 Tag examples:</br>
 'tag' - default tag command, will use tagged node's name as label.</br>
 'tag new_label' - will use 'new_label' as tagged node's label.</br>
