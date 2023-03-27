@@ -12,7 +12,8 @@ A brief introduction of Input Fetcher's features is laid out at the top of the s
 Along with a mock script for testing things out!<br>
 ![ Alt text](media/inputFetcher_demo.gif)
 <br>
-## Installation:
+## Installation:<br>
+Downloading the inputFetcher_Zip.7z file.<br>
 
 1. Go to your .nuke folder.<br>
 2. Copy contents of init.py into your init.py.<br>
