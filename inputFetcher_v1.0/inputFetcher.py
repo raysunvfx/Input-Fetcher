@@ -595,6 +595,7 @@ class InputFetcher(QtWidgets.QDialog):
             if knob != self.id_knob:
                 node[knob].setVisible(False)
 
+
     def createFetchNode(self, label, ident=None, node=None, parent=None):
         if not node:
             fetchNode = nuke.createNode(self.node_class)
@@ -617,6 +618,8 @@ class InputFetcher(QtWidgets.QDialog):
                     pass
             except NameError:
                 self.assign_id(fetchNode, ident)
+
+        inputFetcherUtils.InputFetcherUtils().move_node(fetchNode, 0, inputFetcherConfig._DISTANCE)
         return fetchNode
 
     def goFetch(self):

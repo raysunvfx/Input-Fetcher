@@ -78,3 +78,8 @@ class InputFetcherUtils():
                     self.input_fetcher_prev_input = None
         except:
             pass
+
+    def move_node(self, node, x, y):
+        node_pos = [node['xpos'].getValue(), node['ypos'].getValue()]
+        node['xpos'].setValue(node_pos[0] + x)
+        node['ypos'].setValue(node_pos[1] + y)
