@@ -599,6 +599,7 @@ class InputFetcher(QtWidgets.QDialog):
     def createFetchNode(self, label, ident=None, node=None, parent=None):
         if not node:
             fetchNode = nuke.createNode(self.node_class)
+            inputFetcherUtils.InputFetcherUtils().move_node(fetchNode, 0, inputFetcherConfig._DISTANCE)
             self.set_label(fetchNode, label)
         else:
             fetchNode = node
@@ -619,7 +620,6 @@ class InputFetcher(QtWidgets.QDialog):
             except NameError:
                 self.assign_id(fetchNode, ident)
 
-        inputFetcherUtils.InputFetcherUtils().move_node(fetchNode, 0, inputFetcherConfig._DISTANCE)
         return fetchNode
 
     def goFetch(self):
@@ -639,5 +639,5 @@ class InputFetcher(QtWidgets.QDialog):
 
 
 inputFetcher = InputFetcher()
-nuke.menu('Nuke').addCommand('Edit/Input Fetcher', inputFetcher.goFetch, 'shift+n')
-nuke.menu('Nuke').addCommand('Edit/Input Fetcher Zoom To Output', inputFetcherUtils.InputFetcherUtils().zoom_to_parent, 'a')
+nuke.menu('Nuke').addCommand('Edit/Input Fetcher', inputFetcher.goFetch, inputFetcherConfig._FETCH)
+nuke.menu('Nuke').addCommand('Edit/Input Fetcher Zoom To Output', inputFetcherUtils.InputFetcherUtils().zoom_to_parent, inputFetcherConfig._ZOOM)

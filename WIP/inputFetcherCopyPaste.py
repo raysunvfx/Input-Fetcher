@@ -113,5 +113,5 @@ def rsPaste():
             untag_fetcher(node)
 
 
-nuke.menu('Nuke').addCommand('Edit/Input_Fetcher_Copy', rsCopy, 'ctrl+c')
-nuke.menu('Nuke').addCommand('Edit/Input_Fetcher_Paste', rsPaste, 'ctrl+v')
+nuke.menu('Nuke').addCommand('Edit/Input_Fetcher_Copy', rsCopy, inputFetcherConfig._COPY)
+nuke.menu('Nuke').addCommand('Edit/Input_Fetcher_Paste', rsPaste, inputFetcherConfig._PASTE)

@@ -35,3 +35,9 @@ _PREFIX_COLOR = {
 
 #COMMAND CONFIG
 _COMMANDS = ['TAG', 'UNTAG']
+
+#HOTKEY CONFIG
+_FETCH = 'shift+n'
+_ZOOM = 'a'
+_COPY = 'ctrl+c'
+_PASTE = 'ctrl+v'
