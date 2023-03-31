@@ -341,15 +341,19 @@ class InputFetcher(QtWidgets.QDialog):
     def labelNode(self):
         input = self.labeller.text().upper()
         n = nuke.selectedNodes()
-
-        if self.inputIsCommand(input):
-            for node in n:
-                if self.is_valid_input(node) or self.is_valid_output(node):
-                    self.warningLabel.setText("CAN'T TAG INPUT OR OUTPUT NODES.\nPLEASE CHECK YOUR SELECTION!")
-                    return
-                cmd = getattr(self, input.split(' ')[0].lower())
-                suffix = ' '.join(input.split(' ')[1:])
-                cmd(nuke.toNode(node.name()), suffix)
+        if input.startswith('/'):
+            cmd = input.split(' ')[0]
+            if self.inputIsCommand(cmd):
+                for node in n:
+                    if self.is_valid_input(node) or self.is_valid_output(node):
+                        self.warningLabel.setText("CAN'T TAG INPUT OR OUTPUT NODES.\nPLEASE CHECK YOUR SELECTION!")
+                        return
+                    cmd_function = getattr(self, cmd[1:].lower())
+                    suffix = ' '.join(input.split(' ')[1:])
+                    cmd_function(nuke.toNode(node.name()), suffix)
+            else:
+                self.warningLabel.setText("{} IS NOT A RECOGNIZED COMMAND!\nTRY AGAIN PLEASE!".format(cmd))
+                return
             self.close()
             return
 
