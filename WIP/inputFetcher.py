@@ -346,6 +346,7 @@ class InputFetcher(QtWidgets.QDialog):
             if self.inputIsCommand(cmd):
                     cmd_function = getattr(self, cmd[1:].lower())
                     cmd_function(input)
+                    return
             else:
                 self.warningLabel.setText("{} IS NOT A RECOGNIZED COMMAND!\nTRY AGAIN PLEASE!".format(cmd))
                 return
