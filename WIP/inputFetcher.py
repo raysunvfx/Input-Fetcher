@@ -354,7 +354,7 @@ class InputFetcher(QtWidgets.QDialog):
             else:
                 self.warningLabel.setText("{} IS NOT A RECOGNIZED COMMAND!\nTRY AGAIN PLEASE!".format(cmd))
                 return
-            self.close()
+            #self.close()
             return
 
         if not n:
@@ -431,31 +431,38 @@ class InputFetcher(QtWidgets.QDialog):
                 self.close()
 
     def tag(self, node, suffix=None):
-        try:
-            node.removeKnob(node.knob('inputFetcherSuffix'))
-            node.removeKnob(node.knob(self.tag_knob))
-        except ValueError:
-            pass
-        if not node.knob(self.tag_knob):
-            knob = nuke.Boolean_Knob(self.tag_knob, self.tag_knob, 1)
-            node.addKnob(knob)
-            knob.setVisible(False)
-            if suffix:
-                suffix_knob = nuke.String_Knob('inputFetcherSuffix')
-                node.addKnob(suffix_knob)
-                node['inputFetcherSuffix'].setValue(suffix)
-                suffix_knob.setVisible(False)
-            node.knob(0).setFlag(0)  # or node.setTab(0)
-        elif node.knob(self.tag_knob) and suffix:
+        if len(nuke.selectedNodes()) == 1:
             try:
-                suffix_knob = nuke.String_Knob('inputFetcherSuffix')
-                node.addKnob(suffix_knob)
-                node['inputFetcherSuffix'].setValue(suffix)
-                suffix_knob.setVisible(False)
+                node.removeKnob(node.knob('inputFetcherSuffix'))
+                node.removeKnob(node.knob(self.tag_knob))
             except ValueError:
                 pass
+            if not node.knob(self.tag_knob):
+                knob = nuke.Boolean_Knob(self.tag_knob, self.tag_knob, 1)
+                node.addKnob(knob)
+                knob.setVisible(False)
+                if suffix:
+                    suffix_knob = nuke.String_Knob('inputFetcherSuffix')
+                    node.addKnob(suffix_knob)
+                    node['inputFetcherSuffix'].setValue(suffix)
+                    suffix_knob.setVisible(False)
+                node.knob(0).setFlag(0)  # or node.setTab(0)
+                self.close()
+            elif node.knob(self.tag_knob) and suffix:
+                try:
+                    suffix_knob = nuke.String_Knob('inputFetcherSuffix')
+                    node.addKnob(suffix_knob)
+                    node['inputFetcherSuffix'].setValue(suffix)
+                    suffix_knob.setVisible(False)
+                    self.close()
+                except ValueError:
+                    pass
+            else:
+                node['inputFetcherSuffix'].setValue(suffix)
+                self.close()
         else:
-            node['inputFetcherSuffix'].setValue(suffix)
+            self.warningLabel.setText("CAN'T TAG MULTIPLE NODES AT THE SAME TIME!")
+            self.reset_labeller_state()
 
     def findTaggedNodes(self):
         for node in nuke.allNodes():
@@ -560,10 +567,22 @@ class InputFetcher(QtWidgets.QDialog):
                 self.untag(node)
         self.close()
 
-    def untag(self, node, *args):
-        for knob in node.knobs():
-            if 'inputFetcherSuffix' == knob or self.tag_knob == knob:
-                node.removeKnob(node.knob(knob))
+    def untag(self, *args):
+        n = nuke.selectedNodes()
+        if len(n) == 1:
+            for knob in n[0].knobs():
+                if 'inputFetcherSuffix' == knob or self.tag_knob == knob:
+                    n[0].removeKnob(n[0].knob(knob))
+                    self.close()
+                else:
+                    self.warningLabel.setText("NODE NOT TAGGED.\nFAILED TO UNTAG!")
+                    self.reset_labeller_state()
+        else:
+            for node in n:
+                for knob in node.knobs():
+                    if 'inputFetcherSuffix' == knob or self.tag_knob == knob:
+                        node.removeKnob(node.knob(knob))
+            self.close()
 
 
     def resetLayout(self, layout):
