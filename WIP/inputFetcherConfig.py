@@ -34,7 +34,7 @@ _PREFIX_COLOR = {
 }
 
 #COMMAND CONFIG
-_COMMANDS = ['/TAG', '/UNTAG']
+_COMMANDS = ['/TAG', '/UNTAG', '/UPDATE']
 
 #HOTKEY CONFIG
 _FETCH = 'shift+n'

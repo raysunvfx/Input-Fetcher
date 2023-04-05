@@ -344,18 +344,11 @@ class InputFetcher(QtWidgets.QDialog):
         if input.startswith('/'):
             cmd = input.split(' ')[0]
             if self.inputIsCommand(cmd):
-                for node in n:
-                    if self.is_valid_input(node) or self.is_valid_output(node):
-                        self.warningLabel.setText("CAN'T TAG INPUT OR OUTPUT NODES.\nPLEASE CHECK YOUR SELECTION!")
-                        return
                     cmd_function = getattr(self, cmd[1:].lower())
-                    suffix = ' '.join(input.split(' ')[1:])
-                    cmd_function(nuke.toNode(node.name()), suffix)
+                    cmd_function(input)
             else:
                 self.warningLabel.setText("{} IS NOT A RECOGNIZED COMMAND!\nTRY AGAIN PLEASE!".format(cmd))
                 return
-            #self.close()
-            return
 
         if not n:
             # print("\nFailed at {}.".format(inputFetcher.setLabel.__name__)) this prints the name of the function
@@ -430,29 +423,52 @@ class InputFetcher(QtWidgets.QDialog):
                             self.createFetchNode(input, node=node)
                 self.close()
 
-    def tag(self, node, suffix=None):
-        if len(nuke.selectedNodes()) == 1:
+    def get_parent_from_label(self, label):
+        return label.replace(self.inputPrefix, self.outputPrefix, 1)
+
+    def update(self, *args):
+        n = nuke.selectedNodes()
+        for node in n:
+            if self.is_valid_input(node):
+                parent_label = self.get_parent_from_label(node['label'].getValue())
+                for x in nuke.allNodes(self.node_class):
+                    if x['label'].getValue() == parent_label:
+                        node[self.id_knob].setValue(x[self.id_knob].getValue())
+                        inputFetcherUtils.InputFetcherUtils().connect_input(node, x)
+            else:
+                pass
+        self.close()
+
+
+    def tag(self, input):
+        n = nuke.selectedNodes()
+        for node in n:
+            if self.is_valid_input(node) or self.is_valid_output(node):
+                self.warningLabel.setText("CAN'T TAG INPUT OR OUTPUT NODES.\nPLEASE CHECK YOUR SELECTION!")
+                return
+        suffix = ' '.join(input.split(' ')[1:])
+        if len(n) == 1:
             try:
-                node.removeKnob(node.knob('inputFetcherSuffix'))
-                node.removeKnob(node.knob(self.tag_knob))
+                n[0].removeKnob(n[0].knob('inputFetcherSuffix'))
+                n[0].removeKnob(n[0].knob(self.tag_knob))
             except ValueError:
                 pass
-            if not node.knob(self.tag_knob):
+            if not n[0].knob(self.tag_knob):
                 knob = nuke.Boolean_Knob(self.tag_knob, self.tag_knob, 1)
-                node.addKnob(knob)
+                n[0].addKnob(knob)
                 knob.setVisible(False)
                 if suffix:
                     suffix_knob = nuke.String_Knob('inputFetcherSuffix')
-                    node.addKnob(suffix_knob)
-                    node['inputFetcherSuffix'].setValue(suffix)
+                    n[0].addKnob(suffix_knob)
+                    n[0]['inputFetcherSuffix'].setValue(suffix)
                     suffix_knob.setVisible(False)
-                node.knob(0).setFlag(0)  # or node.setTab(0)
+                n[0].knob(0).setFlag(0)  # or node.setTab(0)
                 self.close()
             elif node.knob(self.tag_knob) and suffix:
                 try:
                     suffix_knob = nuke.String_Knob('inputFetcherSuffix')
-                    node.addKnob(suffix_knob)
-                    node['inputFetcherSuffix'].setValue(suffix)
+                    n[0].addKnob(suffix_knob)
+                    n[0]['inputFetcherSuffix'].setValue(suffix)
                     suffix_knob.setVisible(False)
                     self.close()
                 except ValueError:
