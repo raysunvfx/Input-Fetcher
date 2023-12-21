@@ -57,6 +57,7 @@ class InputFetcher(QtWidgets.QDialog):
         QtCore.QTimer.singleShot(0, self.labeller.setFocus)
         self.labellerLabel = QtWidgets.QLabel('ENTER LABEL:')
         self.labellerLabel.setFont(QtGui.QFont(self.button_font, 15, QtGui.QFont.Bold))
+
         self.warningLabel = QtWidgets.QLabel('')
         self.warningLabel.setFont(QtGui.QFont(self.button_font, 15, QtGui.QFont.Bold))
         self.warningLabel.setStyleSheet('color : yellow')
@@ -66,6 +67,15 @@ class InputFetcher(QtWidgets.QDialog):
         self.labelDivider.setFrameShape(QtWidgets.QFrame.HLine)
         self.labelDivider.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.mainLayout.addWidget(self.labellerLabel)
+        if inputFetcherConfig._SHOW_INSTRUCTIONS:
+            self.labellerCommands = QtWidgets.QLabel('Use the syntax OUT_CATEGORY_THING to create an OUTPUT:\n'
+                                              'Use /tag command to add a tag a node\n'
+                                              'Use /untag command to untag a node\n'
+                                              'Use /update to force an input to connect\n'
+                                              'Hotkey Ctrl + C to connect all selected inputs\n'
+                                              'Hotkey A to jump between current input and output')
+            self.labellerCommands.setFont(QtGui.QFont(self.button_font, 10))
+            self.mainLayout.addWidget(self.labellerCommands)
         self.mainLayout.addWidget(self.warningLabel)
         self.mainLayout.addWidget(self.labeller)
         self.mainLayout.addWidget(self.labelDivider)
